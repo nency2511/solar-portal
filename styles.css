@@ -1,0 +1,1172 @@
+/* =========================
+   Solar Portal Styles (BOLD THEME + strong table borders)
+   Common CSS for all pages
+========================= */
+
+:root{
+  /* 🔥 BOLD / VIBRANT DASHBOARD */
+  --sidebar:#061A2D;        /* deep navy */
+  --sidebar2:#031020;       /* deeper */
+  --topbar:#F1F7FF;         /* bright top */
+  --page:#F6F9FF;           /* fresh background */
+  --card:#FFFFFF;
+  --card2:#F7FBFF;
+
+  --border: rgba(6,26,45,.22);
+  --text:#050505;
+  --muted: rgba(6,19,31,.62);
+
+  --accent:#194448;         /* neon cyan */
+  --accent2:#7C3AED;        /* electric purple */
+  --good:#22C55E;
+  --danger:#FF2D55;
+
+  --shadow: 0 18px 50px rgba(6,26,45,.14);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+
+body{
+  margin:0;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color:var(--text);
+  background: var(--page);
+  overflow-x:hidden;
+}
+
+/* subtle background texture */
+.bg-orb{
+  position:fixed;
+  width:520px; height:520px;
+  border-radius:50%;
+  filter: blur(55px);
+  opacity:.18;
+  pointer-events:none;
+  animation: floaty 9s ease-in-out infinite;
+}
+/* .orb1{left:-160px; top:-160px; background:rgba(0,229,255,.48)} */
+/* .orb2{right:-190px; top:120px; background:rgba(124,58,237,.32); animation-delay:1.2s} */
+/* .orb3{left:35%; bottom:-240px; background:rgba(255,45,85,.22); animation-delay:2.1s} */
+
+@keyframes floaty{
+  0%,100%{transform:translateY(0) translateX(0) scale(1)}
+  50%{transform:translateY(20px) translateX(12px) scale(1.02)}
+}
+
+.hidden{display:none !important;}
+.muted{color:var(--muted)}
+.small{font-size:12px}
+/* .right{text-align:right} */
+
+/* LOGIN top */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 22px;
+  background: var(--topbar);
+  border-bottom: 1px solid var(--border);
+}
+.brand{display:flex; align-items:center; gap:12px}
+.brandTitle{font-weight:900; letter-spacing:.2px; font-size:18px}
+.brandSub{font-size:12px; color:rgba(6,19,31,.62)}
+
+.chips{display:flex; gap:10px; flex-wrap:wrap}
+.chip{
+  font-size:12px;
+  padding:8px 10px;
+  background:rgba(255, 255, 255, 0.938);
+  border:1px solid var(--border);
+  border-radius:999px;
+}
+
+/* Sun icon */
+.logoSun, .miniSun{
+  position:relative;
+  width:40px; height:40px;
+  display:grid; place-items:center;
+}
+.sunCore{
+  width:16px; height:16px;
+  border-radius:50%;
+  background: radial-gradient(circle at 30% 30%, #FFFFFF, var(--accent));
+  box-shadow: 0 0 28px rgba(0,229,255,.55);
+  animation: pulse 2.2s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.10)}
+}
+.logoSun .ray{
+  position:absolute;
+  width:2px; height:10px;
+  background: linear-gradient(to bottom, rgba(0,229,255,.0), rgba(0,229,255,.95));
+  border-radius:2px;
+  transform-origin: 1px 20px;
+}
+.logoSun .r1{transform:rotate(0deg) translateY(-18px)}
+.logoSun .r2{transform:rotate(45deg) translateY(-18px)}
+.logoSun .r3{transform:rotate(90deg) translateY(-18px)}
+.logoSun .r4{transform:rotate(135deg) translateY(-18px)}
+.logoSun .r5{transform:rotate(180deg) translateY(-18px)}
+.logoSun .r6{transform:rotate(225deg) translateY(-18px)}
+.logoSun .r7{transform:rotate(270deg) translateY(-18px)}
+.logoSun .r8{transform:rotate(315deg) translateY(-18px)}
+
+/* AUTH layout */
+.authWrap{
+  display:grid;
+  grid-template-columns: 520px 1fr;
+  gap:18px;
+  padding: 18px 22px 22px;
+}
+@media (max-width: 980px){
+  .authWrap{grid-template-columns:1fr}
+  .authSide{display:none}
+}
+.authCard{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+  animation: rise .55s ease-out both;
+}
+@keyframes rise{
+  from{transform: translateY(12px); opacity:0}
+  to{transform: translateY(0); opacity:1}
+}
+.authHeader h1{margin:0; font-size:26px; font-weight:900}
+.authHeader p{margin:6px 0 0; color:var(--muted)}
+
+.segmented{
+  display:flex;
+  background: rgba(6,19,31,.06);
+  border:1px solid var(--border);
+  border-radius: 12px;
+  padding:6px;
+  margin:16px 0;
+  gap:6px;
+}
+.segBtn{
+  flex:1;
+  border:0;
+  background:transparent;
+  color:rgba(6,19,31,.62);
+  padding:10px 12px;
+  border-radius: 10px;
+  cursor:pointer;
+  font-weight:900;
+  transition:.2s;
+}
+.segBtn.active{
+  color:#041425;
+  background: linear-gradient(135deg, rgba(0,229,255,.22), rgba(124,58,237,.14));
+  border:1px solid rgba(0,229,255,.32);
+}
+
+.form{display:flex; flex-direction:column; gap:12px}
+.field{display:flex; flex-direction:column; gap:8px}
+label{font-size:12px; color:rgba(6,19,31,.72); font-weight:900; letter-spacing:.2px}
+
+input, select{
+  height:42px;
+  border-radius: 10px;
+  border:1.5px solid rgba(6,26,45,.22);
+  background: #fff;
+  color:var(--text);
+  padding: 0 12px;
+  outline:none;
+  transition:.2s;
+}
+input:focus, select:focus{
+  border-color: rgba(0,229,255,.75);
+  box-shadow: 0 0 0 4px rgba(0,229,255,.14);
+}
+.hint{font-size:12px; color:rgba(6,19,31,.55)}
+
+/* ✅ POP primary button */
+.btnPrimary{
+  height:46px;
+  border:0;
+  border-radius: 12px;
+  cursor:pointer;
+  font-weight:900;
+  color:#ecf0f5;
+  /* background: linear-gradient(135deg, var(--accent), var(--accent2)); */
+  background-color: rgb(42, 42, 88);
+  box-shadow: 0 16px 34px rgba(0,229,255,.22);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 0 14px 0 16px;
+  transition:.18s;
+}
+.btnPrimary:hover{transform: translateY(-1px)}
+.btnArrow{font-size:18px}
+
+.btnPrimary.smallBtn{height:42px; border-radius:10px; padding:0 12px}
+.btnGhost{
+  height:42px;
+  border-radius: 10px;
+  background: #fff;
+  border:1.5px solid rgba(6,26,45,.22);
+  color:var(--text);
+  cursor:pointer;
+  font-weight:900;
+  padding:0 14px;
+  transition:.18s;
+}
+.btnGhost:hover{transform: translateY(-1px)}
+.iconBtn{
+  height:42px; width:42px;
+  border-radius: 10px;
+  background:#fff;
+  border:1.5px solid rgba(6,26,45,.22);
+  color:var(--text);
+  cursor:pointer;
+  font-weight:900;
+  transition:.18s;
+}
+.iconBtn:hover{transform: translateY(-1px)}
+
+.demoBox{
+  margin-top:10px;
+  padding:12px;
+  border-radius: 12px;
+  background: rgba(6,19,31,.04);
+  border:1px solid rgba(6,26,45,.18);
+}
+.demoTitle{font-weight:900; font-size:12px; color:rgba(6,19,31,.82); margin-bottom:10px}
+.demoGrid{display:grid; gap:8px}
+.demoUser{
+  display:flex; justify-content:space-between; align-items:center;
+  border:1px solid rgba(6,26,45,.18);
+  background: #fff;
+  padding:10px 12px;
+  border-radius: 10px;
+}
+.demoUser b{font-size:12px}
+.demoUser span{font-size:12px; color:rgba(6,19,31,.60)}
+.footNote{margin-top:12px; font-size:12px; color:rgba(6,19,31,.55)}
+
+.authSide{display:flex}
+.glassCard{
+  width:100%;
+  border-radius: 14px;
+  padding: 20px;
+  border:1px solid rgba(6,26,45,.18);
+  background: #fff;
+  box-shadow: var(--shadow);
+  position:relative;
+  overflow:hidden;
+}
+.glassCard h2{margin:0; font-size:24px}
+.glassCard p{color:rgba(6,19,31,.65); line-height:1.6}
+.featureList{display:flex; flex-direction:column; gap:12px; margin-top:16px}
+.feature{display:flex; gap:12px; align-items:center}
+.fIcon{
+  width:42px;height:42px;border-radius:12px;
+  display:grid; place-items:center;
+  background: rgba(0,229,255,.12);
+  border:1px solid rgba(0,229,255,.18);
+}
+.fTitle{font-weight:900}
+.fSub{color:rgba(6,19,31,.55); font-size:12px}
+
+/* DASH LAYOUT */
+.layout{
+  display:grid;
+  grid-template-columns: 260px 1fr;
+  min-height:100vh;
+}
+
+/* Sidebar */
+.sidebar{
+  padding:0;
+  background: linear-gradient(180deg, var(--sidebar), var(--sidebar2));
+  color:#EAF6FF;
+}
+.sideBrand{
+  display:flex; gap:12px; align-items:center;
+  padding:18px 16px;
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+.sideTitle{font-weight:900; color:#F1FBFF}
+.sideSub{font-size:12px; color:rgba(241,251,255,.70)}
+
+.sideNav{display:flex; flex-direction:column; gap:4px; padding:10px}
+.navBtn{
+  display:flex; align-items:center; gap:10px;
+  height:44px;
+  border-radius: 10px;
+  border:1px solid transparent;
+  background: transparent;
+  color: rgba(241,251,255,.84);
+  cursor:pointer;
+  font-weight:900;
+  padding:0 12px;
+  transition:.18s;
+}
+.navBtn:hover{
+  background: rgba(255,255,255,.07);
+}
+.navBtn.active{
+  background: linear-gradient(135deg, rgba(0,229,255,.22), rgba(124,58,237,.14));
+  border-color: rgba(0,229,255,.30);
+  color:#F3FFFF;
+}
+.navIcon{width:26px; display:grid; place-items:center}
+
+.sideFooter{padding:14px 16px; border-top:1px solid rgba(255,255,255,.08); margin-top:auto}
+.tiny{font-size:12px}
+.tiny.muted{color:rgba(241,251,255,.60)}
+
+@media (max-width: 980px){
+  .layout{grid-template-columns: 1fr}
+}
+
+/* Main + top bar */
+.main{padding:16px}
+.dashTop{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+  padding:14px 14px;
+  border-radius: 12px;
+  background:rgb(12, 51, 75);
+  border:1px solid rgba(6,26,45,.18);
+  color: whitesmoke  !important;
+}
+.dashTitle h1{margin:0; font-size:22px; font-weight:900}
+.dashTitle p{margin:6px 0 0; color:rgba(31, 6, 14, 0.62)}
+.topActions{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+
+/* profile */
+.profileWrap{position:relative}
+.profileBtn{
+  border:1.5px solid rgba(6,26,45,.22);
+  background: #fff;
+  color:var(--text);
+  border-radius: 12px;
+  height:44px;
+  padding:0 12px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  transition:.18s;
+}
+.profileBtn:hover{transform: translateY(-1px)}
+.avatar{
+  width:32px;height:32px;border-radius:10px;
+  display:grid; place-items:center;
+  font-weight:900;
+  color:#fafcff;
+  background: linear-gradient(135deg, rgb(26, 3, 95));
+}
+.profileText{display:flex; flex-direction:column; align-items:flex-start; line-height:1.1}
+.pName{font-weight:900; font-size:13px}
+.pRole{font-size:11px; color:rgba(6,19,31,.60)}
+.caret{opacity:.8}
+.profileMenu{
+  position:absolute; right:0; top:52px;
+  width:170px;
+  background:#fff;
+  border:1.5px solid rgba(6,26,45,.22);
+  border-radius: 12px;
+  overflow:hidden;
+  box-shadow: var(--shadow);
+  animation: rise .22s ease-out both;
+}
+.menuItem{
+  width:100%;
+  padding:12px 12px;
+  text-align:left;
+  border:0;
+  background:transparent;
+  color:rgba(6,19,31,.90);
+  cursor:pointer;
+  font-weight:900;
+}
+.menuItem:hover{background: rgba(0,229,255,.12)}
+
+/* Content */
+.content{margin-top:14px}
+.panel{display:none}
+.panel.show{display:block}
+
+.panelHead{
+  display:flex; align-items:flex-start; justify-content:space-between;
+  gap:12px;
+  padding: 8px 2px 14px;
+}
+.panelHead h2{margin:0; font-size:18px; font-weight:900}
+.panelHead p{margin:6px 0 0; color:rgba(6,19,31,.62)}
+.pill{
+  font-size:12px;
+  padding:8px 10px;
+  border-radius:999px;
+  border:1.5px solid rgba(6,26,45,.20);
+  background: #fff;
+  white-space:nowrap;
+}
+
+.grid2{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:14px;
+}
+@media (max-width: 980px){
+  .grid2{grid-template-columns:1fr}
+}
+
+.card{
+  border-radius: 12px;
+  background: var(--card);
+  border:1.5px solid rgba(6,26,45,.18);
+  box-shadow: var(--shadow);
+  padding:14px;
+  animation: rise .35s ease-out both;
+}
+.cardHead{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px}
+.cardHead h3{margin:0; font-size:15px; font-weight:900}
+
+.row2{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
+@media (max-width: 560px){ .row2{grid-template-columns:1fr} }
+
+.radioRow{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
+.radioCard{
+  border:1.5px solid rgba(6,26,45,.18);
+  background: #fff;
+  border-radius: 12px;
+  padding:12px;
+  cursor:pointer;
+  transition:.18s;
+}
+.radioCard:hover{transform: translateY(-1px)}
+.radioCard input{display:none}
+.radioUI{display:flex; align-items:center; gap:10px}
+.radioDot{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid rgba(6,26,45,.40);
+  position:relative;
+}
+.radioText{font-weight:900}
+.radioCard input:checked + .radioUI .radioDot{
+  border-color: rgba(0,229,255,.95);
+  box-shadow: 0 0 0 4px rgba(0,229,255,.14);
+}
+.radioCard input:checked + .radioUI .radioDot::after{
+  content:"";
+  position:absolute; inset:2px;
+  background: var(--accent);
+  border-radius:50%;
+}
+
+.breakBox{
+  border:2px dashed rgba(6,26,45,.22);
+  background: rgba(6,19,31,.03);
+  border-radius: 12px;
+  padding:12px;
+}
+
+/* ✅ TABLES (BOLD borders) */
+.tableWrap{
+  overflow:auto;
+  border-radius: 12px;
+  border:2px solid rgba(6,26,45,.28);
+  background:#fff;
+}
+.tbl{
+  width:100%;
+  border-collapse: collapse;
+  min-width: 520px;
+}
+.tbl th, .tbl td{
+  padding:10px 10px;
+  border-bottom:2px solid rgba(6,26,45,.16);
+  font-size:13px;
+}
+.tbl td{
+  border-right:2px solid rgba(6,26,45,.10);
+}
+.tbl tr td:last-child{
+  border-right:none;
+}
+.tbl th{
+  text-align:left;
+  font-size:12px;
+  color:rgba(6,19,31,.84);
+  background: rgba(0,229,255,.10);
+  border-bottom:2px solid rgba(6,26,45,.22);
+  position: sticky;
+  top:0;
+}
+.tbl tr:hover td{background: rgba(0,229,255,.08)}
+
+/* KPIs */
+.kpiRow{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:12px;
+  margin-bottom:12px;
+}
+@media (max-width: 980px){ .kpiRow{grid-template-columns:1fr} }
+.kpi{
+  border-radius: 12px;
+  padding:14px;
+  background:#fff;
+  border:1.5px solid rgba(6,26,45,.18);
+  box-shadow: var(--shadow);
+  position:relative;
+  overflow:hidden;
+}
+.kpi.glow::after{
+  content:"";
+  position:absolute; inset:-40px;
+  background: radial-gradient(circle at 30% 20%, rgba(0,229,255,.22), transparent 55%);
+  filter: blur(8px);
+}
+.kpiLabel{font-size:12px; color:rgba(6,19,31,.64); font-weight:900}
+.kpiValue{font-size:28px; font-weight:900; margin-top:8px; position:relative}
+.kpiSub{font-size:12px; color:rgba(6,19,31,.52); position:relative}
+
+/* filters */
+.filters{
+  display:grid;
+  grid-template-columns: 160px 170px 170px 170px auto auto;
+  gap:10px;
+  align-items:end;
+}
+@media (max-width: 980px){
+  .filters{grid-template-columns:1fr 1fr;}
+}
+
+/* view toggle pills */
+.viewToggle{
+  display:flex; gap:8px; align-items:center;
+  background: rgba(255,255,255,.70);
+  border:1.5px solid rgba(6,26,45,.18);
+  padding:6px;
+  border-radius: 12px;
+}
+.viewBtn{
+  border:0;
+  cursor:pointer;
+  padding:10px 12px;
+  border-radius: 10px;
+  font-weight:900;
+  color: rgba(6,19,31,.70);
+  background: transparent;
+}
+.viewBtn.active{
+  background: linear-gradient(135deg, rgba(0,229,255,.20), rgba(124,58,237,.14));
+  color: #031020;
+  border:1.5px solid rgba(0,229,255,.28);
+}
+
+/* photos */
+.photoGrid{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:12px;
+}
+@media (max-width: 980px){ .photoGrid{grid-template-columns: repeat(2, 1fr)} }
+@media (max-width: 520px){ .photoGrid{grid-template-columns: 1fr} }
+
+.photoCard{
+  border-radius: 12px;
+  overflow:hidden;
+  border:1.5px solid rgba(6,26,45,.16);
+  background:#fff;
+  cursor:pointer;
+  transition:.18s;
+  box-shadow: var(--shadow);
+}
+.photoCard:hover{transform: translateY(-2px)}
+.photoCard img{width:100%; height:150px; object-fit:cover; display:block}
+.photoMeta{padding:10px 10px 12px}
+.photoMeta .t{font-weight:900; font-size:12px}
+.photoMeta .s{color:rgba(6,19,31,.60); font-size:12px; margin-top:4px}
+
+.imgPreview{
+  border:1.5px solid rgba(6,26,45,.16);
+  border-radius: 12px;
+  overflow:hidden;
+  background:#fff;
+}
+.imgPreview img{width:100%; height:180px; object-fit:cover; display:block}
+
+/* modal */
+.modal{position:fixed; inset:0; z-index:99}
+.modalBackdrop{position:absolute; inset:0; background: rgba(0,0,0,.50)}
+.modalBox{
+  position:relative;
+  width:min(860px, 92vw);
+  margin: 6vh auto 0;
+  border-radius: 12px;
+  border:1.5px solid rgba(6,26,45,.22);
+  background:#fff;
+  box-shadow: 0 24px 70px rgba(0,0,0,.18);
+  overflow:hidden;
+  animation: rise .18s ease-out both;
+}
+.modalClose{
+  position:absolute; right:10px; top:10px;
+  height:38px; width:38px;
+  border-radius: 10px;
+  border:1.5px solid rgba(6,26,45,.22);
+  background:#fff;
+  color:var(--text);
+  cursor:pointer;
+  font-weight:900;
+}
+.modalBox img{width:100%; max-height:70vh; object-fit:contain; display:block; background:#f5f7fb}
+.modalMeta{padding:12px 14px; color:rgba(6,19,31,.72); font-size:13px}
+
+/* =========================
+   LOGIN ONLY PAGE (center)
+========================= */
+.loginOnlyWrap{
+  min-height:100vh;
+  display:grid;
+  place-items:center;
+  padding:24px;
+}
+
+.loginOnlyCard{
+  width:min(460px, 92vw);
+  background: var(--card);
+  border: 1.5px solid rgba(6,26,45,.18);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 18px 18px 16px;
+  animation: rise .55s ease-out both;
+}
+
+.loginBrand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding-bottom:12px;
+  border-bottom:1px solid rgba(6,26,45,.14);
+}
+
+.loginTitle{
+  font-weight:900;
+  font-size:18px;
+  letter-spacing:.2px;
+}
+
+.loginSub{
+  font-size:12px;
+  color: rgba(6,19,31,.62);
+  margin-top:2px;
+}
+
+.loginFoot{
+  margin-top:14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:12px;
+  padding-top:12px;
+  border-top:1px solid rgba(6,26,45,.12);
+}
+
+.loginFoot .dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background: var(--accent);
+  box-shadow: 0 0 18px rgba(0,229,255,.6);
+}
+
+/* =========================================
+   ✅ MOBILE STICKY NAV (Guaranteed)
+   Sidebar becomes top sticky bar on mobile
+========================================= */
+@media (max-width: 980px){
+
+  /* force single column */
+  .layout{
+    display:block !important;
+    min-height:100vh;
+  }
+
+  /* sidebar turns into sticky top bar */
+  .sidebar{
+    position: -webkit-sticky !important;
+    position: sticky !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    z-index: 9999 !important;
+
+    width: 100% !important;
+    height: auto !important;
+
+    padding: 10px 10px 12px !important;
+    margin: 0 !important;
+
+    border-bottom: 2px solid rgba(255,255,255,.12) !important;
+    box-shadow: 0 14px 30px rgba(0,0,0,.20) !important;
+  }
+
+  /* main content full width */
+  .main{
+    width:100% !important;
+    padding: 12px 12px 18px !important;
+  }
+
+  /* keep brand compact */
+  .sideBrand{
+    padding: 10px 10px 10px !important;
+  }
+
+  /* nav becomes horizontal scroll tabs */
+  .sideNav{
+    display:flex !important;
+    flex-direction: row !important;
+    gap:10px !important;
+
+    padding: 10px 6px 4px !important;
+
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+
+    scrollbar-width: none;
+  }
+  .sideNav::-webkit-scrollbar{display:none;}
+
+  /* pill style buttons */
+  .navBtn{
+    flex: 0 0 auto !important;
+    width: auto !important;
+    height: 44px !important;
+    padding: 0 14px !important;
+
+    border-radius: 999px !important;
+    white-space: nowrap !important;
+
+    background: rgba(255,255,255,.07) !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+  }
+
+  .navBtn.active{
+    background: linear-gradient(135deg, rgba(0,229,255,.28), rgba(124,58,237,.18)) !important;
+    border-color: rgba(0,229,255,.32) !important;
+  }
+
+  /* icons a bit smaller */
+  .navIcon{width:22px !important;}
+
+  /* optional: remove footer so bar remains small */
+  .sideFooter{display:none !important;}
+}
+
+/* ✅ compact pager (right-bottom) */
+.pager{
+  margin-top:10px;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;   /* ✅ right side */
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.pagerInfo{
+  margin-right:auto;          /* ✅ info stays left, buttons right */
+  padding-left:2px;
+}
+
+.pagerBtns{display:flex; gap:8px; align-items:center}
+
+.pagerBtn{
+  height:34px !important;     /* ✅ short */
+  padding:0 12px !important;
+  border-radius:10px !important;
+  font-size:12px !important;
+}
+.pagerBtn:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+  transform:none !important;
+}
+
+/* ✅ make table borders bold */
+.tableWrap{
+  border:2px solid rgba(12,26,36,.22) !important;
+}
+.tbl th, .tbl td{
+  border-bottom:2px solid rgba(12,26,36,.14) !important;
+}
+.tbl td{
+  border-right:2px solid rgba(12,26,36,.10);
+}
+.tbl td:last-child, .tbl th:last-child{
+  border-right:none;
+}
+.tbl th{
+  border-bottom:2px solid rgba(12,26,36,.18) !important;
+}
+
+/* =========================================================
+   ✅ ADDED UPDATED CSS (NO CHANGE ABOVE)
+   Only new classes for Admin Summary + Monthly blocks + filters
+========================================================= */
+
+/* tighter head helper (used in admin summary) */
+.tightHead{margin-bottom:8px}
+
+/* ✅ Summary layout (vertical tabs on left) */
+.summaryLayout{
+  display:grid;
+  grid-template-columns: 190px 1fr;
+  gap:12px;
+}
+@media (max-width: 980px){
+  .summaryLayout{grid-template-columns:1fr}
+}
+
+.summaryTabs{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  padding:10px;
+  border-radius:12px;
+  background: rgba(6,19,31,.03);
+  border:1.5px solid rgba(6,26,45,.14);
+}
+.sumTabBtn{
+  height:44px;
+  border-radius:12px;
+  border:1.5px solid rgba(6,26,45,.18);
+  background:#fff;
+  cursor:pointer;
+  font-weight:900;
+  text-align:left;
+  padding:0 12px;
+  transition:.18s;
+}
+.sumTabBtn:hover{transform: translateY(-1px)}
+.sumTabBtn.active{
+  background: linear-gradient(135deg, rgba(0,229,255,.20), rgba(124,58,237,.12));
+  border-color: rgba(0,229,255,.28);
+}
+
+.summaryBody{min-width:0}
+.sumTabPanel{display:none}
+.sumTabPanel.show{display:block}
+
+/* ✅ Monthly blocks (3 fiscal years grid) */
+.monthBlocks{
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap:12px;
+}
+@media (max-width: 980px){
+  .monthBlocks{grid-template-columns:1fr}
+}
+.monthBlock{
+  border-radius:12px;
+  border:1.5px solid rgba(6,26,45,.16);
+  background:#fff;
+  box-shadow: var(--shadow);
+  padding:12px;
+}
+.monthBlockHead{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:10px;
+  margin-bottom:10px;
+}
+.mbTitle{font-weight:900}
+.mbSub{margin-top:2px}
+
+/* mini table inside monthly blocks */
+.tblMini{min-width:280px}
+.totRow td{background: rgba(0,229,255,.06)}
+
+/* ✅ filters used for admin Maintenance/Photo (2 columns) */
+.filtersMnt, .filtersPho{
+  grid-template-columns: 220px 220px;
+}
+@media (max-width: 980px){
+  .filtersMnt, .filtersPho{grid-template-columns:1fr 1fr}
+}
+@media (max-width: 520px){
+  .filtersMnt, .filtersPho{grid-template-columns:1fr}
+}
+
+
+/* =========================================================
+   ✅ ADMIN TABLE UI REVAMP (paste at END)
+   - compact width, less height
+   - header font bigger
+   - vertical borders in header too
+   - rows one-line (no wrap)
+========================================================= */
+
+body[data-page="admin"] .card { padding: 12px; }
+
+/* ✅ Make all admin tables smaller width + centered */
+body[data-page="admin"] .tableWrap{
+  max-width: 780px;
+  margin: 0 auto;
+  overflow: hidden !important;     /* rounded container look */
+  border-radius: 14px !important;
+}
+
+/* ✅ Remove forced min-width (your old tbl min-width was big) */
+body[data-page="admin"] .tbl{
+  min-width: 0 !important;
+}
+
+/* ✅ Compact cell height + single line */
+body[data-page="admin"] .tbl th,
+body[data-page="admin"] .tbl td{
+  padding: 8px 10px !important;
+  font-size: 14px !important;
+  white-space: nowrap !important;
+  vertical-align: middle;
+}
+
+/* ✅ Header font bigger + stronger */
+body[data-page="admin"] .tbl th{
+  font-size: 17.5px !important;     /* ✅ header bigger */
+  font-weight: 900 !important;
+  letter-spacing: .2px;
+  background: rgba(0,229,255,.10) !important;
+}
+
+/* ✅ Vertical borders: header + body (so clear which col is which) */
+body[data-page="admin"] .tbl th,
+body[data-page="admin"] .tbl td{
+  border-right: 2px solid rgba(6,26,45,.12) !important;
+}
+body[data-page="admin"] .tbl th:last-child,
+body[data-page="admin"] .tbl td:last-child{
+  border-right: none !important;
+}
+
+/* ✅ Row separators a bit cleaner */
+body[data-page="admin"] .tbl th,
+body[data-page="admin"] .tbl td{
+  border-bottom: 2px solid rgba(6,26,45,.10) !important;
+}
+
+/* ✅ Remove extra big spacing around summary tables */
+body[data-page="admin"] .cardHead{ margin-bottom: 8px; }
+body[data-page="admin"] .panelHead{ padding-bottom: 10px; }
+
+/* ✅ Keep summary tables not too wide */
+body[data-page="admin"] #sec-agen #adminSummaryWrap .tableWrap{
+  max-width: 860px;
+}
+body[data-page="admin"] #sec-agen #adminMonthlyWrap .tableWrap{
+  max-width: 920px;
+}
+body[data-page="admin"] #sec-agen #adminYearlyWrap .tableWrap{
+  max-width: 720px;
+}
+body[data-page="admin"] #sec-agen #adminLast10Wrap .tableWrap{
+  max-width: 720px;
+}
+
+/* ✅ Mobile: full width */
+@media (max-width: 980px){
+  body[data-page="admin"] .tableWrap{
+    max-width: 100%;
+  }
+  body[data-page="admin"] .tbl th,
+  body[data-page="admin"] .tbl td{
+    padding: 8px 9px !important;
+  }
+}
+
+
+
+/* =========================================================
+   ✅ USER TABLE SCROLL FIX (only user page)
+   - prevents column cut
+   - always allows horizontal scroll when needed
+========================================================= */
+body[data-page="user"] .tableWrap{
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ✅ make table "content-width" so it can overflow & scroll */
+body[data-page="user"] .tableWrap .tbl{
+  width: max-content !important;   /* key */
+  min-width: 520px !important;     /* keeps a base width */
+}
+
+/* ✅ optional: make scrollbar visible in webkit */
+body[data-page="user"] .tableWrap::-webkit-scrollbar{
+  height: 8px;
+}
+body[data-page="user"] .tableWrap::-webkit-scrollbar-thumb{
+  background: rgba(6,26,45,.25);
+  border-radius: 999px;
+}
+
+
+
+/* =========================================================
+   ✅ TABLE RESPONSIVE FIX (GLOBAL + VARIANTS)
+   - No forced same width for all
+   - 2-col tables can be compact
+   - no header/col cut on mobile
+========================================================= */
+
+/* ✅ Default: tableWrap should allow horizontal scroll when needed */
+.tableWrap{
+  overflow-x: auto !important;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ✅ Remove global forced min-width (THIS is main reason for cut) */
+.tbl{
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 0 !important;          /* ✅ was 520px */
+  table-layout: auto;               /* ✅ flexible */
+}
+
+/* ✅ By default, allow wrapping so headers don't cut */
+.tbl th, .tbl td{
+  white-space: normal;              /* ✅ was nowrap in admin override */
+  word-break: break-word;
+}
+
+/* ✅ VARIANTS: use per table */
+
+/* 1) Compact tables (2 columns like Month | Total Units) */
+.tableWrap--fit{
+  display: inline-block;            /* ✅ will shrink to content */
+  max-width: 100%;
+}
+.tbl--compact{
+  width: auto !important;           /* ✅ content based width */
+  min-width: 280px;                 /* ✅ minimum small */
+}
+.tbl--compact th, .tbl--compact td{
+  padding: 8px 10px;
+}
+
+/* 2) Medium default tables */
+.tbl--md{ min-width: 520px; }
+
+/* 3) Large tables (maintenance) */
+.tbl--lg{ min-width: 900px; }
+
+/* ✅ Optional: Sticky header works fine with scroll */
+.tbl th{
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* ✅ Mobile: reduce padding + font so nothing cuts */
+@media (max-width: 520px){
+  .tbl th, .tbl td{
+    padding: 8px 8px !important;
+    font-size: 12px !important;
+  }
+}
+
+/* =========================================================
+   ✅ ADMIN OVERRIDE CLEANUP (remove width forcing)
+   - Don’t force max-width for ALL tables
+========================================================= */
+body[data-page="admin"] .tableWrap{
+  max-width: unset !important;       /* ✅ stop forcing same width */
+  margin: 0 !important;              /* ✅ allow natural */
+  /* overflow-x: auto !important; */
+}
+
+/* ✅ If you want SOME tables centered only, use class tableCenter */
+.tableCenter{
+  max-width: 860px;
+  margin: 0 auto;
+}
+
+
+/* =========================================================
+   ✅ TABLE REVAMP (works for admin + user)
+   Apply by adding class="tableWrap tableRevamp"
+========================================================= */
+
+.tableWrap.tableRevamp{
+  border-radius: 14px !important;
+  border: 2px solid rgba(6,26,45,.18) !important;
+  background:#fff !important;
+
+  /* ✅ IMPORTANT: allow horizontal scroll */
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ✅ table should be able to overflow to scroll */
+.tableWrap.tableRevamp .tbl{
+  width: max-content !important;
+  min-width: 520px !important;
+  border-collapse: collapse !important;
+}
+
+/* ✅ Compact cell height + single line */
+.tableWrap.tableRevamp .tbl th,
+.tableWrap.tableRevamp .tbl td{
+  padding: 8px 10px !important;
+  font-size: 14px !important;
+  white-space: nowrap !important;
+  vertical-align: middle;
+
+  border-right: 2px solid rgba(6,26,45,.12) !important;
+  border-bottom: 2px solid rgba(6,26,45,.10) !important;
+}
+
+.tableWrap.tableRevamp .tbl th:last-child,
+.tableWrap.tableRevamp .tbl td:last-child{
+  border-right:none !important;
+}
+
+/* ✅ Header font bigger + sticky */
+.tableWrap.tableRevamp .tbl th{
+  font-size: 17.5px !important;
+  font-weight: 900 !important;
+  letter-spacing: .2px;
+  background: rgba(0,229,255,.10) !important;
+
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* ✅ hover */
+.tableWrap.tableRevamp .tbl tr:hover td{
+  background: rgba(0,229,255,.08) !important;
+}
+
+
+
+.sideBrand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sideLogo {
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+}

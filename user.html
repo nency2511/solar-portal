@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Solar Portal – User Dashboard</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body data-page="user">
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+     <div class="sideBrand">
+  <img src="https://www.friendssteel.com/wp-content/uploads/2020/04/logo.png" alt="Solar Logo" class="sideLogo" />
+  <div>
+    <div class="sideTitle">Solar Portal</div>
+    <div class="sideSub">User Panel</div>
+  </div>
+</div>
+
+
+      <nav class="sideNav">
+        <button class="navBtn active" data-section="gen">
+          <span class="navIcon">⚡</span>
+          <span>Generation Units Data</span>
+        </button>
+        <button class="navBtn" data-section="mnt">
+          <span class="navIcon">🧰</span>
+          <span>Maintenance Data</span>
+        </button>
+        <button class="navBtn" data-section="pho">
+          <span class="navIcon">📸</span>
+          <span>Photographs</span>
+        </button>
+      </nav>
+
+      <div class="sideFooter">
+        <div class="tiny">© Solar Portal</div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <header class="dashTop">
+        <div class="dashTitle">
+          <h1 id="userGreeting">Dashboard</h1>
+          <p id="userSubtitle" style="color: whitesmoke;">Capture daily solar data quickly.</p>
+        </div>
+
+        <div class="topActions">
+          <div class="profileWrap">
+            <button class="profileBtn" id="profileBtn" type="button">
+              <span class="avatar" id="avatarLetter">U</span>
+              <span class="profileText">
+                <span class="pName" id="profileName">User</span>
+                <span class="pRole">User</span>
+              </span>
+              <span class="caret">▾</span>
+            </button>
+
+            <div class="profileMenu hidden" id="profileMenu">
+              <button class="menuItem" id="logoutBtn">Logout</button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT -->
+      <section class="content">
+
+        <!-- DAILY UNITS -->
+        <div class="panel show" id="sec-gen">
+          <div class="panelHead">
+            <div>
+              <h1>Daily Generation Data Entry</h1>
+              <!-- <p>Date auto-captured. Enter units for Ashiana/Darpan.</p> -->
+            </div>
+            <!-- <div class="pill">Auto Date 📅</div> -->
+          </div>
+
+          <div class="grid2">
+            <div class="card">
+              <form id="genForm" class="form">
+                <div class="field">
+                  <label>Date (YYYY-MM-DD)</label>
+                  <input id="genDate" type="date" readonly />
+                </div>
+
+                <div class="row2">
+                  <div class="field">
+                    <label style="font-size: 15px; color: black;">Ashiana Generation Units (kWh)</label>
+                    <input id="genUnitsAshiyana" type="number" min="0" step="0.01" placeholder="e.g. 1250.50" />
+                  </div>
+                  <div class="field">
+                    <label style="font-size: 15px; color: black;" >Darpan Generation Units (kWh)</label>
+                    <input id="genUnitsDarpan" type="number" min="0" step="0.01" placeholder="e.g. 980.25" />
+                  </div>
+                </div>
+
+                <button class="btnPrimary" type="submit">
+                  <span>Submit Entry</span>
+                  <span class="btnArrow">→</span>
+                </button>
+              </form>
+            </div>
+
+            <div class="card">
+              <div class="cardHead">
+                <div>
+                  <h3>Your Recent Unit Entries</h3>
+                  <!-- <div class="muted small">8 entries per page</div> -->
+                </div>
+              </div>
+
+              <!-- Filters -->
+              <div class="row2" style="margin-top:10px;">
+                <div class="field">
+                  <label>From Date</label>
+                  <input id="genFrom" type="date" />
+                </div>
+                <div class="field">
+                  <label>To Date</label>
+                  <input id="genTo" type="date" />
+                </div>
+              </div>
+
+             <div class="tableWrap tableRevamp" style="margin-top:12px;">
+
+                <table class="tbl tbl--md" id="userGenTable">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Plant</th>
+                      <th>Units</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+
+              <!-- Pagination -->
+              <div class="pager">
+                <div class="pagerInfo muted small" id="genPageInfo"></div>
+                <div class="pagerBtns">
+                  <button class="btnGhost pagerBtn" id="genPrev" type="button">← Prev</button>
+                  <button class="btnGhost pagerBtn" id="genNext" type="button">Next →</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- MAINTENANCE -->
+        <div class="panel" id="sec-mnt">
+          <div class="panelHead">
+            <div>
+              <h1>Maintenance Checklist</h1>
+              <!-- <p>Capture staff presence, cleaning hours, breakdown details.</p> -->
+            </div>
+            <!-- <div class="pill">Quick Log 🧾</div> -->
+          </div>
+
+          <div class="grid2">
+            <div class="card">
+              <form id="mntForm" class="form">
+                <div class="row2">
+                  <div class="field">
+                    <label style="font-size: 15px; color: black;">Date (YYYY-MM-DD)</label>
+                    <input id="mntDate" type="date" readonly />
+                  </div>
+                  <div class="field">
+                    <label style="font-size: 15px; color: black;">Select Plant</label>
+                    <select id="mntPlant">
+                      <option value="Ashiana">Ashiana</option>
+                      <option value="Darpan">Darpan</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="row2">
+                  <div class="field">
+                    <label style="font-size: 15px; color: black;">O&amp;M Staff Present (count)</label>
+                    <input id="omStaff" type="number" min="0" step="1" placeholder="e.g. 4" required />
+                  </div>
+                  <div class="field">
+                    <label style="font-size: 15px; color: black;">Security Present (count)</label>
+                    <input id="securityCount" type="number" min="0" step="1" placeholder="e.g. 2" required />
+                  </div>
+                </div>
+
+                <div class="row2">
+                  <div class="field">
+                    <label style="font-size: 15px; color: black;">Cleaning Hours</label>
+                    <select id="cleaningHours" required>
+                      <option value="1">1</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                      <option value="4">4</option>
+                      <option value="5">5</option>
+                      <option value="6">6</option>
+                      <option value="7">7</option>
+                      <option value="8">8</option>
+                      <option value="9">9</option>
+                      <option value="10">10</option>
+                      <option value="11">11</option>
+                      <option value="12">12</option>
+                    </select>
+                  </div>
+
+                  <div class="field">
+                    <label style="font-size: 15px; color: black;">Breakdown?</label>
+                    <select id="breakdownYes">
+                      <option value="No">No</option>
+                      <option value="Yes">Yes</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="breakBox" id="breakBox">
+                  <div class="row2">
+                    <div class="field">
+                      <label style="font-size: 15px; color: black;">Breakdown Hours</label>
+                      <input id="breakHours" type="number" min="0" step="0.5" placeholder="e.g. 1.5"/>
+                    </div>
+                    <div class="field">
+                      <label style="font-size: 15px; color: black;">Breakdown Time Range</label>
+                      <div class="row2">
+                        <input id="breakFrom" type="time"/>
+                        <input id="breakTo" type="time"/>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="field" style="margin-top:10px;">
+                    <label style="font-size: 15px; color: black;">Breakdown Reason</label>
+                    <input id="breakReason" type="text" placeholder="e.g. Inverter fault / Grid issue" />
+                  </div>
+                </div>
+
+                <button class="btnPrimary" type="submit">
+                  <span>Submit Maintenance</span>
+                  <span class="btnArrow">→</span>
+                </button>
+              </form>
+            </div>
+
+            <div class="card">
+              <div class="cardHead">
+                <div>
+                  <h3>Your Recent Maintenance Logs</h3>
+                  <!-- <div class="muted small">8 entries per page</div> -->
+                </div>
+              </div>
+
+              <!-- Filters -->
+              <div class="row2" style="margin-top:10px;">
+                <div class="field">
+                  <label>From Date</label>
+                  <input id="mntFrom" type="date" />
+                </div>
+                <div class="field">
+                  <label>To Date</label>
+                  <input id="mntTo" type="date" />
+                </div>
+              </div>
+
+         <div class="tableWrap tableRevamp" style="margin-top:12px;">
+
+                <table class="tbl tbl--md" id="userMntTable">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Plant</th>
+                      <th>O&amp;M</th>
+                      <th>Sec</th>
+                      <th>Cleaning hrs</th>
+                      <th>Breakdown</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+
+              <!-- Pagination -->
+              <div class="pager">
+                <div class="pagerInfo muted small" id="mntPageInfo"></div>
+                <div class="pagerBtns">
+                  <button class="btnGhost pagerBtn" id="mntPrev" type="button">← Prev</button>
+                  <button class="btnGhost pagerBtn" id="mntNext" type="button">Next →</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- PHOTOS -->
+        <div class="panel" id="sec-pho">
+          <div class="panelHead">
+            <div>
+              <h1>Photographs Upload</h1>
+              <!-- <p>Upload Daily/Weekly/Monthly plant photographs with date.</p> -->
+            </div>
+            <!-- <div class="pill">Image Log 📌</div> -->
+          </div>
+
+          <div class="grid2">
+            <div class="card">
+              <form id="photoForm" class="form">
+                <div class="row2">
+                  <div class="field">
+                    <label style="font-size: 15px; color: black;">Date (YYYY-MM-DD)</label>
+                    <input id="photoDate" type="text" readonly />
+                  </div>
+                  <div class="field">
+                    <label style="font-size: 15px; color: black;">Period</label>
+                    <select id="photoPeriod">
+                      <option value="Daily">Daily</option>
+                      <option value="Weekly">Weekly</option>
+                      <option value="Monthly">Monthly</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label style="font-size: 15px; color: black;">Select Plant</label>
+                  <div class="radioRow">
+                    <label class="radioCard">
+                      <input type="radio" name="plantPhoto" value="Ashiana" checked />
+                      <span class="radioUI">
+                        <span class="radioDot"></span>
+                        <span class="radioText">Ashiana</span>
+                      </span>
+                    </label>
+                    <label class="radioCard">
+                      <input type="radio" name="plantPhoto" value="Darpan" />
+                      <span class="radioUI">
+                        <span class="radioDot"></span>
+                        <span class="radioText">Darpan</span>
+                      </span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="field">
+                  <label style="font-size: 15px; color: black;">Upload Images</label>
+                  <input id="photoFile" type="file" accept="image/*" multiple required />
+                  <div class="hint">You can select multiple images at once.</div>
+                </div>
+
+                <div class="imgPreview hidden" id="imgPreviewWrap">
+                  <img id="imgPreview" alt="Preview"/>
+                </div>
+
+                <button class="btnPrimary" type="submit">
+                  <span>Save Photograph(s)</span>
+                  <span class="btnArrow">→</span>
+                </button>
+              </form>
+            </div>
+
+            <div class="card">
+              <div class="cardHead">
+                <div>
+                  <h3>Your Recent Photos</h3>
+                  <!-- <div class="muted small">6 photos per page</div> -->
+                </div>
+              </div>
+
+              <!-- Filters -->
+              <div class="row2" style="margin-top:10px;">
+                <div class="field">
+                  <label>From Date</label>
+                  <input id="phoFrom" type="date" />
+                </div>
+                <div class="field">
+                  <label>To Date</label>
+                  <input id="phoTo" type="date" />
+                </div>
+              </div>
+
+              <div class="photoGrid" id="userPhotoGrid" style="margin-top:12px;"></div>
+
+              <!-- Pagination -->
+              <div class="pager">
+                <div class="pagerInfo muted small" id="phoPageInfo"></div>
+                <div class="pagerBtns">
+                  <button class="btnGhost pagerBtn" id="phoPrev" type="button">← Prev</button>
+                  <button class="btnGhost pagerBtn" id="phoNext" type="button">Next →</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- Image Modal -->
+  <div class="modal hidden" id="imgModal">
+    <div class="modalBackdrop" data-close="1"></div>
+    <div class="modalBox">
+      <button class="modalClose" data-close="1">✕</button>
+      <img id="modalImg" alt="Uploaded"/>
+      <div class="modalMeta" id="modalMeta"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="app.js"></script>
+</body>
+</html>

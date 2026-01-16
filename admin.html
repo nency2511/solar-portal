@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Solar Portal – Admin Dashboard</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body data-page="admin">
+  <div class="bg-orb orb1"></div>
+  <div class="bg-orb orb2"></div>
+  <div class="bg-orb orb3"></div>
+
+  <div class="layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+     <div class="sideBrand">
+  <img src="https://www.friendssteel.com/wp-content/uploads/2020/04/logo.png" alt="Solar Logo" class="sideLogo" />
+  <div>
+    <div class="sideTitle">Solar Portal</div>
+    <div class="sideSub">Admin Panel</div>
+  </div>
+</div>
+
+
+      <nav class="sideNav">
+        <button class="navBtn active" data-section="agen">
+          <span class="navIcon">📊</span>
+          <span>Generation Data</span>
+        </button>
+        <button class="navBtn" data-section="amnt">
+          <span class="navIcon">🧾</span>
+          <span>Maintenance Data</span>
+        </button>
+        <button class="navBtn" data-section="apho">
+          <span class="navIcon">🖼️</span>
+          <span>Photographs</span>
+        </button>
+      </nav>
+
+      <div class="sideFooter">
+        <div class="tiny">Admin access</div>
+        <div class="tiny muted">View all logs</div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <header class="dashTop">
+        <div class="dashTitle">
+          <h1>Admin Dashboard</h1>
+          <!-- <p style="color: white;">View entries user-wise, plant-wise, date-wise.</p> -->
+        </div>
+
+        <div class="topActions">
+          <button class="btnGhost" id="adminLogout">Logout</button>
+        <!-- </div>Auto date filter + pagination. -->
+      </header>
+
+      <section class="content">
+
+        <!-- =========================
+             ADMIN: DAILY UNITS
+        ========================== -->
+        <div class="panel show" id="sec-agen">
+          <div class="panelHead">
+            <div>
+              <h1>Generation Data – Summary</h1>
+              <!-- <p>Daily / Monthly / Yearly summary + Table/Graph + Download.</p> -->
+            </div>
+
+            <div class="viewToggle">
+              <button class="viewBtn active" id="sumViewTableBtn" type="button">Table</button>
+              <button class="viewBtn" id="sumViewGraphBtn" type="button">Graph</button>
+              <!-- <button class="btnGhost smallBtn hidden" id="downloadChartBtn" type="button">Download</button> -->
+            </div>
+          </div>
+
+          <!-- ✅ Period Totals -->
+          <div class="card">
+            <div class="cardHead">
+              <h3>Today / Month / Year Totals</h3>
+              <!-- <div class="muted small">Auto from all users</div> -->
+            </div>
+
+            <div class="tableWrap">
+              <table class="tbl tbl--md">
+                <thead>
+                  <tr>
+                    <th>Period</th>
+                    <th class="right">Ashiana</th>
+                    <th class="right">Darpan</th>
+                    <th class="right">Total</th>
+                  </tr>
+                </thead>
+                <tbody id="adminPeriodTotalsBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- ✅ Summary layout: Vertical tabs + content -->
+          <div class="card">
+            <div class="summaryLayout">
+              <!-- LEFT: Vertical tabs (✅ Daily removed) -->
+              <div class="summaryTabs">
+                <button class="sumTabBtn active" data-sumtab="monthly">Monthly</button>
+                <button class="sumTabBtn" data-sumtab="yearly">Yearly</button>
+              </div>
+
+              <!-- RIGHT: Content -->
+              <div class="summaryBody">
+
+                <!-- MONTHLY (✅ Month | Total Units) -->
+                <div class="sumTabPanel show" id="sumtab-monthly">
+                  <div class="cardHead tightHead">
+                    <h3>Monthly Summary (Current Year)</h3>
+                    <!-- <div class="muted small">Auto builds from Jan → current month</div> -->
+                  </div>
+
+                  <div id="sumMonthlyTableWrap">
+                    <div class="tableWrap tableWrap--fit">
+                      <table class="tbl tbl--compact">
+                      <thead>
+  <tr>
+    <th>Month</th>
+    <th class="right">Ashiyana</th>
+    <th class="right">Darpan</th>
+    <th class="right">Total</th>
+  </tr>
+</thead>
+
+                        <tbody id="adminMonthlyBody"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- YEARLY -->
+                <div class="sumTabPanel" id="sumtab-yearly">
+                  <div class="cardHead tightHead">
+                    <h3>Yearly Summary</h3>
+                    <!-- <div class="muted small">Year-wise totals (Ashiana / Darpan / Total)</div> -->
+                  </div>
+
+                  <div id="sumYearlyTableWrap">
+                    <div class="tableWrap">
+                      <table class="tbl tbl--md">
+                        <thead>
+                          <tr>
+                            <th>Year</th>
+                            <th class="right">Ashiana</th>
+                            <th class="right">Darpan</th>
+                            <th class="right">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody id="adminYearlyBody"></tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- GRAPH (shared canvas for Monthly/Yearly) -->
+                <div class="hidden" id="sumGraphWrap">
+                  <div style="height:360px;">
+                    <canvas id="summaryChart"></canvas>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+
+          <!-- ✅ LAST 10 DAYS -->
+         <div class="card">
+  <div class="panelHead" style="padding:0 0 12px;">
+    <div>
+      <h1 style="margin:0;font-size:20px;">Last 15 Days</h1>
+
+      <!-- ✅ NEW: date range (auto apply) -->
+      <div style="margin-top:10px; display:flex; gap:10px; flex-wrap:wrap;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="muted" style="font-size:12px;">From</span>
+          <input type="date" id="last10FromAdmin" class="inp inp--sm" />
+        </div>
+
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span class="muted" style="font-size:12px;">To</span>
+          <input type="date" id="last10ToAdmin" class="inp inp--sm" disabled />
+        </div>
+      </div>
+    </div>
+
+    <div class="viewToggle">
+      <button class="viewBtn active" id="last10TableBtn" type="button">Table</button>
+      <button class="viewBtn" id="last10GraphBtn" type="button">Graph</button>
+    </div>
+  </div>
+
+  <div id="last10TableWrap">
+    <div class="tableWrap">
+      <table class="tbl tbl--md">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th class="right">Darpan</th>
+            <th class="right">Ashiana</th>
+            <th class="right">Total</th>
+          </tr>
+        </thead>
+        <tbody id="adminLast10Body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="hidden" id="last10GraphWrap" style="height:320px;">
+    <canvas id="last10Chart"></canvas>
+  </div>
+</div>
+
+        </div>
+
+        <!-- =========================
+             ADMIN: MAINTENANCE
+        ========================== -->
+        <div class="panel" id="sec-amnt">
+          <div class="panelHead">
+            <div>
+              <h1>Maintenance Logs</h1>
+              <!-- <p>Auto date filter + pagination.</p> -->
+            </div>
+            <!-- <div class="pill">Checklist 🧰</div> -->
+          </div>
+
+          <div class="card">
+            <div class="cardHead">
+              <!-- <h3>Filters</h3> -->
+              <!-- <div class="muted small">Date-wise auto apply</div> -->
+            </div>
+
+            <div class="filters filtersMnt">
+              <div class="field">
+                <label>From Date</label>
+                <input id="mntFromAdmin" type="date"/>
+              </div>
+              <div class="field">
+                <label>To Date</label>
+                <input id="mntToAdmin" type="date"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="cardHead">
+              <h3>All Maintenance Entries</h3>
+              <div class="muted small" id="adminMntCount">0 rows</div>
+            </div>
+
+            <div class="tableWrap">
+              <table class="tbl tbl--lg" id="adminMntTable">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>User</th>
+                    <th>Plant</th>
+                    <th class="right">O&amp;M</th>
+                    <th class="right">Security</th>
+                    <th class="right">Cleaning hrs</th>
+                    <th>Breakdown</th>
+                    <th class="right">Breakdown hrs</th>
+                    <th>Breakdown range</th>
+                    <th>Breakdown remarks</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+
+            <div class="pager">
+              <div class="pagerInfo muted small" id="mntPageInfo">Page 1 / 1 • 0 items</div>
+              <div class="pagerBtns">
+                <button class="btnGhost pagerBtn" id="mntPrevAdmin" type="button">Prev</button>
+                <button class="btnGhost pagerBtn" id="mntNextAdmin" type="button">Next</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =========================
+             ADMIN: PHOTOS
+        ========================== -->
+        <div class="panel" id="sec-apho">
+          <div class="panelHead">
+            <div>
+              <h1>Photographs</h1>
+              <!-- <p>3 photos per page + date-wise filter.</p> -->
+            </div>
+            <!-- <div class="pill">Photolog 📸</div> -->
+          </div>
+
+          <div class="card">
+            <div class="cardHead">
+              <!-- <h3>Filters</h3>
+              <div class="muted small">Date-wise auto apply</div> -->
+            </div>
+
+            <div class="filters filtersPho">
+              <div class="field">
+                <label>From Date</label>
+                <input id="phoFromAdmin" type="date"/>
+              </div>
+              <div class="field">
+                <label>To Date</label>
+                <input id="phoToAdmin" type="date"/>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="cardHead">
+              <h3>All Photo Entries</h3>
+              <div class="muted small" id="adminPhotoCount">0 items</div>
+            </div>
+
+            <div class="photoGrid" id="adminPhotoGrid"></div>
+
+            <div class="pager">
+              <div class="pagerInfo muted small" id="phoPageInfoAdmin">Page 1 / 1 • 0 items</div>
+              <div class="pagerBtns">
+                <button class="btnGhost pagerBtn" id="phoPrevAdmin" type="button">Prev</button>
+                <button class="btnGhost pagerBtn" id="phoNextAdmin" type="button">Next</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <!-- Image Modal -->
+  <div class="modal hidden" id="imgModal">
+    <div class="modalBackdrop" data-close="1"></div>
+    <div class="modalBox">
+      <button class="modalClose" data-close="1">✕</button>
+      <img id="modalImg" alt="Uploaded"/>
+      <div class="modalMeta" id="modalMeta"></div>
+    </div>
+  </div>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="app.js"></script>
+</body>
+</html>
