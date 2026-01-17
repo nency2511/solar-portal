@@ -37,7 +37,7 @@ const LS_KEYS = {
   PHO: "sp_photo_entries",
 };
 
-const ADMIN_STATIC = { email: "admin@solar.com", password: "Admin@1234", name: "Solar Admin" };
+const ADMIN_STATIC = { email: "admin@solar.com", password: "Admin@123", name: "Solar Admin" };
 
 function $(sel, root = document) { return root.querySelector(sel); }
 function $all(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
@@ -692,7 +692,7 @@ async function renderUserTables(userId) {
 
       const ts = new Date(pick(r, "Timestamp")).getTime() || 0;
 
-      if (ashRaw !== "" && !Number.isNaN(ash)) genAll.push({ isoDate, plant: "Ashiyana", units: ash, ts });
+      if (ashRaw !== "" && !Number.isNaN(ash)) genAll.push({ isoDate, plant: "Aashiana ", units: ash, ts });
       if (darRaw !== "" && !Number.isNaN(dar)) genAll.push({ isoDate, plant: "Darpan", units: dar, ts });
     }
 
@@ -779,7 +779,8 @@ async function renderUserTables(userId) {
       mntPaged.items.map(r => `
         <tr>
           <td>${r.isoDate}</td>
-          <td>${r.plant}</td>
+          <td>${r.plant === "Ashiana" ? "Aashiana" : r.plant}</td>
+
           <td>${r.omStaff}</td>
           <td>${r.securityCount}</td>
           <td>${r.cleaningHours}</td>
@@ -1317,7 +1318,7 @@ function renderStackChart(canvasSel, instanceKey, labels, aData, dData, title) {
     data: {
       labels,
       datasets: [
-        { label: "Ashiyana", data: aData, backgroundColor: "rgba(37,199,199,.55)", borderColor: "rgba(37,199,199,.9)", borderWidth: 1, borderRadius: 6, stack: "stack1" },
+        { label: "Aashiana", data: aData, backgroundColor: "rgba(37,199,199,.55)", borderColor: "rgba(37,199,199,.9)", borderWidth: 1, borderRadius: 6, stack: "stack1" },
         { label: "Darpan", data: dData, backgroundColor: "rgba(11,42,60,.50)", borderColor: "rgba(11,42,60,.85)", borderWidth: 1, borderRadius: 6, stack: "stack1" }
       ]
     },
@@ -1412,7 +1413,8 @@ async function renderAdminMaintenance() {
         <tr>
           <td>${r.isoDate}</td>
           <td>${r.userName || r.userId || ""}</td>
-          <td>${r.plant || ""}</td>
+        <td>${r.plant === "Ashiana" ? "Aashiana" : r.plant}</td>
+
           <td class="right">${r.omStaff ?? ""}</td>
           <td class="right">${r.securityCount ?? ""}</td>
           <td class="right">${r.cleaningHours ?? ""}</td>
@@ -1530,4 +1532,3 @@ function photoMeta(p) {
 
   window.addEventListener("scroll", onScroll, { passive: true });
 })();
-
