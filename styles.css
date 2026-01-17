@@ -1172,7 +1172,6 @@ body[data-page="admin"] .tableWrap{
 }
 
 
-
 /* ✅ FIX: Allow table scroll on mobile (Admin Maintenance table) */
 body[data-page="admin"] #sec-amnt .tableWrap{
   overflow-x: auto !important;
@@ -1185,4 +1184,99 @@ body[data-page="admin"] #sec-amnt .tableWrap{
 body[data-page="admin"] #sec-amnt .tableWrap .tbl{
   width: max-content !important;
   min-width: 900px !important;  /* maintenance is big */
+}
+
+
+/* ✅ USER: stop page from becoming wider due to table min-width */
+body[data-page="user"] .tbl,
+body[data-page="user"] .tbl--md,
+body[data-page="user"] .tbl--lg{
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+/* ✅ USER: if tableRevamp is used, don't force max-content width */
+body[data-page="user"] .tableWrap.tableRevamp .tbl{
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+
+/* ✅ USER MAINTENANCE: horizontal scroll instead of wrapping */
+body[data-page="user"] .mntTableWrap{
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* keep table in one line */
+body[data-page="user"] .mntTableWrap table{
+  white-space: nowrap !important;
+  min-width: 720px !important;
+}
+
+
+/* ✅ USER MAINTENANCE: horizontal scroll (final) */
+body[data-page="user"] #sec-mnt .tableWrap{
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
+}
+
+body[data-page="user"] #sec-mnt .tableWrap .tbl{
+  width: max-content !important;
+  min-width: 720px !important;   /* need ho to 800/900 kar dena */
+}
+
+body[data-page="user"] #userMntTable th,
+body[data-page="user"] #userMntTable td{
+  white-space: nowrap !important;
+}
+
+
+/* =========================================================
+   ✅ FINAL: USER > MAINTENANCE ONLY
+   - Form fields responsive (no overflow)
+   - Table horizontal scroll (no wrap)
+========================================================= */
+
+/* 1) Maintenance FORM: make inputs/selects shrink properly on small screens */
+body[data-page="user"] #sec-mnt .grid2,
+body[data-page="user"] #sec-mnt .card,
+body[data-page="user"] #sec-mnt .row2,
+body[data-page="user"] #sec-mnt .field{
+  min-width: 0 !important;
+}
+
+body[data-page="user"] #sec-mnt input,
+body[data-page="user"] #sec-mnt select{
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* On very small screens: force 1 column */
+@media (max-width: 560px){
+  body[data-page="user"] #sec-mnt .row2{
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* 2) Maintenance TABLE: horizontal scroll */
+body[data-page="user"] #sec-mnt .tableWrap{
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-x;
+}
+
+/* keep table wide + no wrapping, so it scrolls nicely */
+body[data-page="user"] #sec-mnt #userMntTable{
+  width: max-content !important;
+  min-width: 760px !important;  /* if still tight: 900px */
+}
+
+body[data-page="user"] #sec-mnt #userMntTable th,
+body[data-page="user"] #sec-mnt #userMntTable td{
+  white-space: nowrap !important;
 }
