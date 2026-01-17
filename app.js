@@ -2,14 +2,31 @@
    Solar Portal (LocalStorage Demo) — UPDATED
    ✅ Admin: Daily summary (Monthly/Yearly) + Graph + Download
    ✅ Admin: Last 10 days (Table/Graph)
-   ✅ Admin: Maintenance date filter auto apply + pagination
-   ✅ Admin: Photos 3 per page + date filter auto apply + pagination
+   ✅ Maintenance: Submit to Google Form (Sheet backend)
+   ✅ Maintenance: Fetch from Sheet via API (optional) + fallback LS
+   ✅ Photos: LocalStorage (as-is)
    ✅ LOGIN: Users now fetched from Google Sheet (Apps Script API)
 ========================= */
 
 // ✅ Google Sheet Users API (Apps Script Web App)
 const USERS_API_URL =
   "https://script.google.com/macros/s/AKfycbwZOhQDaa35qA1ul5OdnKUpzJzllH_IpE2QBA9ZunCkU9CPHBOG3qHr9kT6YJZ8nOap/exec";
+
+// ✅ GEN API (you already have)
+const GEN_API_URL =
+  "https://script.google.com/macros/s/AKfycbyiaL1GeXhcafI1yNta3Ckue1Y-RDyEzBP7nFcFw-lok8RZQzAzosaGgUro-ppXCwab/exec";
+
+/*
+✅ IMPORTANT (NEW):
+Maintenance logs fetch ke liye aapko bhi ek Apps Script JSON API chahiye (GEN jaisa).
+Jab aap banake doge, yaha paste kar dena.
+
+Example:
+const MNT_API_URL = "https://script.google.com/macros/s/AKfycbxxxx/exec";
+*/
+const MNT_API_URL =
+  "https://script.google.com/macros/s/AKfycbx1gXmBGZZanCvVMsrEI5KAYn6sdscMwjz4i44O8A6Qf5O5NvmJxk6nHUA5-VEWspQGNQ/exec";
+ // <-- paste maintenance sheet API here (optional)
 
 const LS_KEYS = {
   USERS: "sp_users",
@@ -49,9 +66,7 @@ function nowStamp() {
 }
 
 /* =========================
-   ✅ SEED (UPDATED)
-   - ❌ Removed static demo user seeding
-   - ✅ Keep admin + data arrays seeding
+   ✅ SEED
 ========================= */
 function seedIfNeeded() {
   const admin = lsGet(LS_KEYS.ADMIN, null);
@@ -104,6 +119,42 @@ function cryptoId() { return "id_" + Math.random().toString(16).slice(2) + "_" +
 function escapeAttr(str) { return String(str).replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); }
 
 /* =========================
+   ✅ ONE UNIVERSAL GOOGLE FORM POST HELPER (ONLY ONCE)
+========================= */
+function postToGoogleForm(url, payloadObj) {
+  const iframeName = "hidden_iframe_mnt";
+
+  // create iframe once
+  let iframe = document.querySelector(`iframe[name="${iframeName}"]`);
+  if (!iframe) {
+    iframe = document.createElement("iframe");
+    iframe.name = iframeName;
+    iframe.style.display = "none";
+    document.body.appendChild(iframe);
+  }
+
+  // create form
+  const form = document.createElement("form");
+  form.action = url;              // ✅ MUST be .../formResponse
+  form.method = "POST";
+  form.target = iframeName;
+
+  Object.entries(payloadObj || {}).forEach(([k, v]) => {
+    const input = document.createElement("input");
+    input.type = "hidden";
+    input.name = k;
+    input.value = v == null ? "" : String(v);
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+  form.remove();
+}
+
+
+
+/* =========================
    PAGINATION + FILTER HELPERS
 ========================= */
 function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
@@ -149,7 +200,7 @@ function bindAutoDateFilter({ fromSel, toSel, stateObj, onChange }) {
 }
 
 /* =========================
-   ✅ LAST 15 DAYS FIXED WINDOW HELPERS (NEW)
+   ✅ LAST 15 DAYS FIXED WINDOW HELPERS
 ========================= */
 function addDaysISO(isoDate, addDays) {
   if (!isoDate) return "";
@@ -202,12 +253,7 @@ function bindAutoFixedWindowFilter({ fromSel, toSel, stateObj, days, onChange })
 }
 
 /* =========================
-   ✅ GOOGLE SHEET LOGIN HELPERS (NEW)
-   Expected API JSON:
-   [
-     { userId:"u101", name:"Ravi Patel", password:"User@101" },
-     ...
-   ]
+   ✅ GOOGLE SHEET LOGIN HELPERS
 ========================= */
 async function fetchUsersFromSheet() {
   const res = await fetch(USERS_API_URL, { method: "GET" });
@@ -219,27 +265,22 @@ async function fetchUsersFromSheet() {
 async function getUsersForLogin() {
   try {
     const users = await fetchUsersFromSheet();
-
-    // ✅ convert to app format: {id, name, password}
     const list = users.map(u => ({
       id: String(u.userId || "").trim(),
       name: String(u.name || "").trim(),
       password: String(u.password || "").trim(),
     })).filter(u => u.id && u.password);
 
-    // ✅ optional cache (so if sheet is down later, app still works)
     if (list.length) lsSet(LS_KEYS.USERS, list);
-
     return list;
   } catch (err) {
     console.error(err);
-    // fallback: cached users (if any)
     return lsGet(LS_KEYS.USERS, []);
   }
 }
 
 /* =========================
-   LOGIN PAGE  ✅ UPDATED (Sheet users)
+   LOGIN PAGE
 ========================= */
 async function initLoginPage() {
   seedIfNeeded();
@@ -268,10 +309,9 @@ async function initLoginPage() {
     userForm.classList.add("hidden");
   });
 
-  // ✅ USERS from Sheet (instead of static local)
   const users = await getUsersForLogin();
+  if (Array.isArray(users) && users.length) lsSet(LS_KEYS.USERS, users);
 
-  // demo users UI (if you show it)
   if (demoUsersWrap) {
     if (!users.length) {
       demoUsersWrap.innerHTML = `<div class="muted">No users loaded (Sheet API not reachable).</div>`;
@@ -297,6 +337,8 @@ async function initLoginPage() {
     if (!u) return toastErr("Login failed", "Invalid User ID or Password.");
 
     setSession({ role: "user", userId: u.id, loginAt: Date.now() });
+    localStorage.setItem("sp_current_user", JSON.stringify(u));
+
     toastOk("Welcome!", `Hello ${u.name}`);
     setTimeout(() => window.location.href = "user.html", 350);
   });
@@ -306,9 +348,11 @@ async function initLoginPage() {
     const email = $("#adminEmail").value.trim();
     const pass = $("#adminPass").value.trim();
     const admin = lsGet(LS_KEYS.ADMIN, ADMIN_STATIC);
+
     if (email !== admin.email || pass !== admin.password) {
       return toastErr("Login failed", "Invalid Admin credentials.");
     }
+
     setSession({ role: "admin", loginAt: Date.now() });
     toastOk("Welcome!", "Admin access granted.");
     setTimeout(() => window.location.href = "admin.html", 350);
@@ -316,7 +360,7 @@ async function initLoginPage() {
 }
 
 /* =========================
-   USER PAGE (UNCHANGED LOGIC)
+   USER PAGE
 ========================= */
 const userViewState = {
   gen: { from: "", to: "", page: 1, perPage: 8 },
@@ -392,185 +436,160 @@ function initUserPage() {
   breakdownSel?.addEventListener("change", toggleBreak);
   toggleBreak();
 
-  // Generation submit
- // ✅ Google Form (Generation) config
-const GEN_FORM_BASE =
-  "https://docs.google.com/forms/d/e/1FAIpQLSfOJ61at9CSII4oWE4wGHdUafpYMPChrmkK8385-vqAiozw1Q/formResponse";
+  /* =========================
+     ✅ GEN SUBMIT (Google Form)
+  ========================= */
+  const GEN_FORM_BASE =
+    "https://docs.google.com/forms/d/e/1FAIpQLSfOJ61at9CSII4oWE4wGHdUafpYMPChrmkK8385-vqAiozw1Q/formResponse";
 
-// ✅ entry ids
-const GEN_ENTRY_USER_ID = "entry.1974299693";  // User ID
-const GEN_ENTRY_DATE    = "entry.2137798723";  // Date
-const GEN_ENTRY_ASH     = "entry.614917472";   // Ashiana
-const GEN_ENTRY_DAR     = "entry.728178038";   // Darpan
+  const GEN_ENTRY_USER_ID = "entry.1974299693";
+  const GEN_ENTRY_DATE    = "entry.2137798723";
+  const GEN_ENTRY_ASH     = "entry.614917472";
+  const GEN_ENTRY_DAR     = "entry.728178038";
 
-function postToGoogleForm(url, payloadObj) {
-  // NOTE: no-cors => browser won't give response, but submission works
-  return fetch(url, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams(payloadObj).toString(),
-  });
-}
+  $("#genForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-$("#genForm")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
+    const sess = getSession();
+    const loggedUserId = sess?.userId || "";
+    const date = $("#genDate")?.value || nowStamp().isoDate;
 
-  const sess = getSession();
-  const loggedUserId = sess?.userId || ""; // ✅ u101/u102 etc. (from login)
+    const ash = $("#genUnitsAshiyana").value.trim();
+    const dar = $("#genUnitsDarpan").value.trim();
 
-  const date = $("#genDate")?.value || nowStamp().isoDate;
+    const ashOk = ash !== "" && Number(ash) >= 0;
+    const darOk = dar !== "" && Number(dar) >= 0;
 
-  const ash = $("#genUnitsAshiyana").value.trim();
-  const dar = $("#genUnitsDarpan").value.trim();
+    if (!loggedUserId) return toastErr("Session missing", "Please login again.");
+    if (!ashOk && !darOk) return toastErr("Invalid units", "Enter Ashiyana or Darpan units (or both).");
 
-  const ashOk = ash !== "" && Number(ash) >= 0;
-  const darOk = dar !== "" && Number(dar) >= 0;
+    const payload = {};
+    payload[GEN_ENTRY_USER_ID] = loggedUserId;
+    payload[GEN_ENTRY_DATE] = date;
+    payload[GEN_ENTRY_ASH] = ashOk ? ash : "";
+    payload[GEN_ENTRY_DAR] = darOk ? dar : "";
 
-  if (!loggedUserId) return toastErr("Session missing", "Please login again.");
-  if (!ashOk && !darOk) return toastErr("Invalid units", "Enter Ashiyana or Darpan units (or both).");
+    try {
+      await postToGoogleForm(GEN_FORM_BASE, payload);
 
-  // ✅ Prepare Google Form payload
-  const payload = {};
-  payload[GEN_ENTRY_USER_ID] = loggedUserId;
-  payload[GEN_ENTRY_DATE] = date;
+      $("#genUnitsAshiyana").value = "";
+      $("#genUnitsDarpan").value = "";
 
-  // Optional: if blank, send empty string
-  payload[GEN_ENTRY_ASH] = ashOk ? ash : "";
-  payload[GEN_ENTRY_DAR] = darOk ? dar : "";
+      toastOk("Submitted!", "Saved to Google Sheet successfully.");
 
-  try {
-    await postToGoogleForm(GEN_FORM_BASE, payload);
-
-    // Clear UI
-    $("#genUnitsAshiyana").value = "";
-    $("#genUnitsDarpan").value = "";
-    // genDate already readonly/auto, keep it
-
-    toastOk("Submitted!", "Saved to Google Sheet successfully.");
-  } catch (err) {
-    console.error(err);
-    toastErr("Failed", "Could not submit. Please try again.");
-  }
-});
-
-
-
- // ✅ Google Form (Maintenance) config
-// ✅ Google Form (Maintenance) submit URL
-const MNT_FORM_BASE =
-  "https://docs.google.com/forms/d/e/1FAIpQLScoTlpED27u8V2QmCoS97YLLuiYeGdlxe0dSTEVqFTdWUVZ0w/formResponse";
-
-// ✅ entry ids (Maintenance)
-const MNT_ENTRY_DATE        = "entry.2055755283";
-const MNT_ENTRY_PLANT       = "entry.1535385882";
-const MNT_ENTRY_OM          = "entry.428958107";
-const MNT_ENTRY_SECURITY    = "entry.1530388072";
-const MNT_ENTRY_CLEANING    = "entry.115155756";
-const MNT_ENTRY_BREAKDOWN   = "entry.357119222";
-const MNT_ENTRY_BREAKHRS    = "entry.1039751489";
-const MNT_ENTRY_BREAKFROM   = "entry.30921687";
-const MNT_ENTRY_BREAKTO     = "entry.848833855";
-const MNT_ENTRY_BREAKREASON = "entry.159566579";
-
-// ✅ MUST: helper (paste once, reuse for gen/mnt/etc.)
-async function postToGoogleForm(url, payloadObj) {
-  const params = new URLSearchParams();
-  Object.entries(payloadObj).forEach(([k, v]) => {
-    params.append(k, v == null ? "" : String(v));
-  });
-
-  // NOTE: no-cors => we can't read response, but submission works if payload is valid
-  await fetch(url, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
-    body: params.toString(),
-  });
-}
-
-// ✅ Maintenance submit (REPLACE your old localStorage submit with this)
-$("#mntForm")?.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const t = nowStamp();
-
-  const date = $("#mntDate")?.value || t.isoDate;
-
-  const plant = ($("#mntPlant")?.value || "").trim();
-  const om = ($("#omStaff")?.value || "").trim();
-  const sec = ($("#securityCount")?.value || "").trim();
-  const cleaning = ($("#cleaningHours")?.value || "").trim();
-  const breakdown = ($("#breakdownYes")?.value || "No").trim();
-
-  // ✅ Validations
-  if (!plant) return toastErr("Invalid", "Please select Plant.");
-
-  const omOk = om !== "" && Number(om) >= 0;
-  const secOk = sec !== "" && Number(sec) >= 0;
-  const cleaningOk = cleaning !== "" && Number(cleaning) >= 0;
-
-  if (!omOk) return toastErr("Invalid", "Enter valid O&M staff count.");
-  if (!secOk) return toastErr("Invalid", "Enter valid security count.");
-  if (!cleaningOk) return toastErr("Invalid", "Enter valid cleaning hours.");
-
-  let breakHrs = "";
-  let breakFrom = "";
-  let breakTo = "";
-  let breakReason = "";
-
-  if (breakdown === "Yes") {
-    breakHrs = ($("#breakHours")?.value || "").trim();
-    breakFrom = ($("#breakFrom")?.value || "").trim();
-    breakTo = ($("#breakTo")?.value || "").trim();
-    breakReason = ($("#breakReason")?.value || "").trim();
-
-    if (breakHrs !== "" && Number(breakHrs) < 0) {
-      return toastErr("Invalid", "Break hours cannot be negative.");
+      // small delay then refresh
+      setTimeout(() => renderUserTables(me.id), 1200);
+    } catch (err) {
+      console.error(err);
+      toastErr("Failed", "Could not submit. Please try again.");
     }
-  }
+  });
 
-  // ✅ Prepare Google Form payload
-  const payload = {};
-  payload[MNT_ENTRY_DATE] = date;
-  payload[MNT_ENTRY_PLANT] = plant;
-  payload[MNT_ENTRY_OM] = om;
-  payload[MNT_ENTRY_SECURITY] = sec;
-  payload[MNT_ENTRY_CLEANING] = cleaning;
-  payload[MNT_ENTRY_BREAKDOWN] = breakdown;
+  /* =========================
+     ✅ MAINTENANCE SUBMIT (Google Form)
+     ✅ viewform -> formResponse (sir wala change)
+     ✅ + userId entry added
+  ========================= */
+  const MNT_FORM_BASE =
+    "https://docs.google.com/forms/d/e/1FAIpQLScoTlpED27u8V2QmCoS97YLLuiYeGdlxe0dSTEVqFTdWUVZ0w/formResponse";
 
-  // ✅ Always send (empty ok)
-  payload[MNT_ENTRY_BREAKHRS] = breakdown === "Yes" ? (breakHrs || "0") : "";
-  payload[MNT_ENTRY_BREAKFROM] = breakdown === "Yes" ? breakFrom : "";
-  payload[MNT_ENTRY_BREAKTO] = breakdown === "Yes" ? breakTo : "";
-  payload[MNT_ENTRY_BREAKREASON] = breakdown === "Yes" ? breakReason : "";
+  const MNT_ENTRY_DATE        = "entry.2055755283";
+  const MNT_ENTRY_PLANT       = "entry.1535385882";
+  const MNT_ENTRY_OM          = "entry.428958107";
+  const MNT_ENTRY_SECURITY    = "entry.1530388072";
+  const MNT_ENTRY_CLEANING    = "entry.115155756";
+  const MNT_ENTRY_BREAKDOWN   = "entry.357119222";
+  const MNT_ENTRY_BREAKHRS    = "entry.1039751489";
+  const MNT_ENTRY_BREAKFROM   = "entry.30921687";
+  const MNT_ENTRY_BREAKTO     = "entry.848833855";
+  const MNT_ENTRY_BREAKREASON = "entry.159566579";
+  const MNT_ENTRY_USERID      = "entry.1447036759"; // ✅ NEW: userid
 
-  try {
-    await postToGoogleForm(MNT_FORM_BASE, payload);
+  $("#mntForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const t = nowStamp();
 
-    // ✅ Clear UI (same as before)
-    $("#omStaff").value = "";
-    $("#securityCount").value = "";
-    $("#cleaningHours").value = "1";
-    $("#breakdownYes").value = "No";
+    const sess = getSession();
+    const loggedUserId = sess?.userId || "";
+    if (!loggedUserId) return toastErr("Session missing", "Please login again.");
 
-    toggleBreak?.();
-    fillUserDatesOnly?.();
+    const date = $("#mntDate")?.value || t.isoDate;
 
-    userViewState.mnt.page = 1;
+    const plant = ($("#mntPlant")?.value || "").trim();
+    const om = ($("#omStaff")?.value || "").trim();
+    const sec = ($("#securityCount")?.value || "").trim();
+    const cleaning = ($("#cleaningHours")?.value || "").trim();
+    const breakdown = ($("#breakdownYes")?.value || "No").trim();
 
-    // ✅ IMPORTANT: you removed LS, so this table won't auto-update from LS.
-    // renderUserTables(me.id); // keep only if you later fetch maintenance from sheet
+    if (!plant) return toastErr("Invalid", "Please select Plant.");
 
-    toastOk("Submitted!", "Maintenance saved to Google Sheet successfully.");
-  } catch (err) {
-    console.error(err);
-    toastErr("Failed", "Could not submit maintenance. Please try again.");
-  }
-});
+    const omOk = om !== "" && Number(om) >= 0;
+    const secOk = sec !== "" && Number(sec) >= 0;
+    const cleaningOk = cleaning !== "" && Number(cleaning) >= 0;
+
+    if (!omOk) return toastErr("Invalid", "Enter valid O&M staff count.");
+    if (!secOk) return toastErr("Invalid", "Enter valid security count.");
+    if (!cleaningOk) return toastErr("Invalid", "Enter valid cleaning hours.");
+
+    let breakHrs = "";
+    let breakFrom = "";
+    let breakTo = "";
+    let breakReason = "";
+
+    if (breakdown === "Yes") {
+      breakHrs = ($("#breakHours")?.value || "").trim();
+      breakFrom = ($("#breakFrom")?.value || "").trim();
+      breakTo = ($("#breakTo")?.value || "").trim();
+      breakReason = ($("#breakReason")?.value || "").trim();
+
+      if (breakHrs !== "" && Number(breakHrs) < 0) {
+        return toastErr("Invalid", "Break hours cannot be negative.");
+      }
+    }
+
+    const payload = {};
+    payload[MNT_ENTRY_DATE] = date;
+    payload[MNT_ENTRY_PLANT] = plant;
+    payload[MNT_ENTRY_OM] = om;
+    payload[MNT_ENTRY_SECURITY] = sec;
+    payload[MNT_ENTRY_CLEANING] = cleaning;
+    payload[MNT_ENTRY_BREAKDOWN] = breakdown;
+
+    payload[MNT_ENTRY_BREAKHRS] = breakdown === "Yes" ? (breakHrs || "0") : "";
+    payload[MNT_ENTRY_BREAKFROM] = breakdown === "Yes" ? breakFrom : "";
+    payload[MNT_ENTRY_BREAKTO] = breakdown === "Yes" ? breakTo : "";
+    payload[MNT_ENTRY_BREAKREASON] = breakdown === "Yes" ? breakReason : "";
+
+    // ✅ NEW: userId send to sheet
+    payload[MNT_ENTRY_USERID] = loggedUserId;
+
+    try {
+    postToGoogleForm(MNT_FORM_BASE, payload);
 
 
+      $("#omStaff").value = "";
+      $("#securityCount").value = "";
+      $("#cleaningHours").value = "1";
+      $("#breakdownYes").value = "No";
 
-  // Photo upload
+      toggleBreak?.();
+      fillUserDatesOnly?.();
+
+      userViewState.mnt.page = 1;
+
+      toastOk("Submitted!", "Maintenance saved to Google Sheet successfully.");
+
+      // ✅ small delay then refresh
+      setTimeout(() => renderUserTables(me.id), 1200);
+    } catch (err) {
+      console.error(err);
+      toastErr("Failed", "Could not submit maintenance. Please try again.");
+    }
+  });
+
+  /* =========================
+     PHOTO UPLOAD (LOCALSTORAGE AS-IS)
+  ========================= */
   const photoFile = $("#photoFile");
   const imgPreviewWrap = $("#imgPreviewWrap");
   const imgPreview = $("#imgPreview");
@@ -633,36 +652,53 @@ $("#mntForm")?.addEventListener("submit", async (e) => {
   renderUserPhotos(me.id);
 }
 
+/* =========================
+   USER: TABLES (GEN from API, MNT from API optional)
+========================= */
 async function renderUserTables(userId) {
-  /* =========================
-     ✅ GEN (from Google Sheet via Apps Script)
-  ========================= */
+  /* ---------- GEN ---------- */
   const gState = userViewState.gen;
 
   let genAll = [];
   try {
-    const url = `${GEN_API_URL}?action=gen&userId=${encodeURIComponent(userId)}&from=${encodeURIComponent(gState.from || "")}&to=${encodeURIComponent(gState.to || "")}`;
-    const res = await fetch(url);
-    const data = await res.json();
+    const res = await fetch(GEN_API_URL);
+    const raw = await res.json();
 
-    // expected: { ok:true, rows:[ {isoDate:"2026-01-16", ash:454, dar:222}, ... ] }
-    const rows = (data?.rows || []);
+    const uid = String(userId || "").trim();
 
-    // convert into table rows: Date | Plant | Units
+    const pick = (obj, keyName) => {
+      const k = Object.keys(obj || {}).find(k => k.trim() === keyName.trim());
+      return k ? obj[k] : "";
+    };
+
+    const rows = Array.isArray(raw) ? raw : [];
+
+    const filtered = rows
+      .filter(r => String(pick(r, "User ID")).trim() === uid || String(pick(r, "  User ID  ")).trim() === uid)
+      .filter(r => {
+        const d = String(pick(r, "Date") || "").trim();
+        return d && withinDateRange(d, gState.from, gState.to);
+      });
+
     genAll = [];
-    for (const r of rows) {
-      if (r.ash !== "" && r.ash !== null && r.ash !== undefined) {
-        genAll.push({ isoDate: r.isoDate, plant: "Ashiyana", units: Number(r.ash || 0) });
-      }
-      if (r.dar !== "" && r.dar !== null && r.dar !== undefined) {
-        genAll.push({ isoDate: r.isoDate, plant: "Darpan", units: Number(r.dar || 0) });
-      }
+    for (const r of filtered) {
+      const isoDate = String(pick(r, "Date") || "").trim();
+
+      const ashRaw = pick(r, "Ashiana Generation Units (kWh)");
+      const darRaw = pick(r, "Darpan Generation Units (kWh)");
+
+      const ash = ashRaw === "" ? "" : Number(ashRaw);
+      const dar = darRaw === "" ? "" : Number(darRaw);
+
+      const ts = new Date(pick(r, "Timestamp")).getTime() || 0;
+
+      if (ashRaw !== "" && !Number.isNaN(ash)) genAll.push({ isoDate, plant: "Ashiyana", units: ash, ts });
+      if (darRaw !== "" && !Number.isNaN(dar)) genAll.push({ isoDate, plant: "Darpan", units: dar, ts });
     }
 
-    // latest first
-    genAll.sort((a, b) => (b.isoDate || "").localeCompare(a.isoDate || ""));
+    genAll.sort((a, b) => (b.ts || 0) - (a.ts || 0));
   } catch (err) {
-    console.error(err);
+    console.error("GEN fetch failed:", err);
     genAll = [];
   }
 
@@ -681,19 +717,58 @@ async function renderUserTables(userId) {
       `).join("") || `<tr><td colspan="3" class="muted">No entries yet.</td></tr>`;
   }
 
-  $("#genPageInfo") && ($("#genPageInfo").textContent = `Page ${genPaged.page} / ${genPaged.totalPages} • ${genPaged.total} items`);
+  $("#genPageInfo") && ($("#genPageInfo").textContent =
+    `Page ${genPaged.page} / ${genPaged.totalPages} • ${genPaged.total} items`);
   $("#genPrev") && ($("#genPrev").disabled = genPaged.page <= 1);
   $("#genNext") && ($("#genNext").disabled = genPaged.page >= genPaged.totalPages);
 
-  /* =========================
-     ✅ MNT (same as before - LocalStorage)
-  ========================= */
+  /* ---------- MNT ---------- */
   const mState = userViewState.mnt;
+  let mntAll = [];
 
-  const mntAll = lsGet(LS_KEYS.MNT, [])
-    .filter(x => x.userId === userId)
-    .filter(x => withinDateRange(x.isoDate, mState.from, mState.to))
-    .sort((a, b) => b.createdAt - a.createdAt);
+  // ✅ your JSON uses these exact keys:
+  // "Date", "Select Plant", "O&M Staff Present (count)", "Security Present (count)",
+  // "Cleaning Hours", "Breakdown?", "Breakdown Hours", "Breakdown Time Range -from",
+  // "Breakdown Time Range -to", "Breakdown Reason", "User Id", "Timestamp"
+
+  if (MNT_API_URL) {
+    try {
+      const res = await fetch(MNT_API_URL);
+      const rows = await res.json();
+
+      const uid = String(userId || "").trim();
+      const isValidISO = (d) => /^\d{4}-\d{2}-\d{2}$/.test(String(d || "").trim());
+
+      mntAll = (Array.isArray(rows) ? rows : [])
+        // ✅ remove header/test/junk rows
+        .filter(r => isValidISO(r["Date"]))
+        // ✅ only logged-in user rows
+        .filter(r => String(r["User Id"] || "").trim() === uid)
+        // ✅ date filter
+        .filter(r => withinDateRange(String(r["Date"]).trim(), mState.from, mState.to))
+        // ✅ normalize to our internal structure
+        .map(r => ({
+          isoDate: String(r["Date"]).trim(),
+          plant: String(r["Select Plant"] || "").trim(),
+          omStaff: String(r["O&M Staff Present (count)"] ?? "").trim(),
+          securityCount: String(r["Security Present (count)"] ?? "").trim(),
+          cleaningHours: String(r["Cleaning Hours"] ?? "").trim(),
+          breakdown: String(r["Breakdown?"] || "").trim(),
+          ts: new Date(r["Timestamp"]).getTime() || 0,
+        }))
+        .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+
+    } catch (e) {
+      console.error("MNT fetch failed:", e);
+      mntAll = [];
+    }
+  } else {
+    // fallback local (unchanged)
+    mntAll = lsGet(LS_KEYS.MNT, [])
+      .filter(x => x.userId === userId)
+      .filter(x => withinDateRange(x.isoDate, mState.from, mState.to))
+      .sort((a, b) => b.createdAt - a.createdAt);
+  }
 
   const mntPaged = paginate(mntAll, mState.page, mState.perPage);
   userViewState.mnt.page = mntPaged.page;
@@ -713,11 +788,11 @@ async function renderUserTables(userId) {
       `).join("") || `<tr><td colspan="6" class="muted">No logs yet.</td></tr>`;
   }
 
-  $("#mntPageInfo") && ($("#mntPageInfo").textContent = `Page ${mntPaged.page} / ${mntPaged.totalPages} • ${mntPaged.total} items`);
+  $("#mntPageInfo") && ($("#mntPageInfo").textContent =
+    `Page ${mntPaged.page} / ${mntPaged.totalPages} • ${mntPaged.total} items`);
   $("#mntPrev") && ($("#mntPrev").disabled = mntPaged.page <= 1);
   $("#mntNext") && ($("#mntNext").disabled = mntPaged.page >= mntPaged.totalPages);
 }
-
 
 function renderUserPhotos(userId) {
   const pState = userViewState.pho;
@@ -765,14 +840,14 @@ let last10ChartInstance = null;
 
 const adminState = {
   summary: {
-    tab: "monthly",   // ✅ monthly | yearly
-    mode: "table"     // table | graph
+    tab: "monthly",
+    mode: "table"
   },
   last10: {
-    mode: "table",     // table | graph
+    mode: "table",
     from: "",
     to: "",
-    days: 15           // ✅ fixed 15-day window
+    days: 15
   },
   mnt: { from: "", to: "", page: 1, perPage: 10 },
   pho: { from: "", to: "", page: 1, perPage: 3 },
@@ -787,7 +862,6 @@ function initAdminPage() {
     window.location.href = "index.html";
   });
 
-  // Sidebar nav
   $all(".navBtn").forEach(btn => {
     btn.addEventListener("click", () => {
       $all(".navBtn").forEach(b => b.classList.remove("active"));
@@ -798,7 +872,6 @@ function initAdminPage() {
     });
   });
 
-  // Vertical tabs (Monthly/Yearly only)
   $all(".sumTabBtn").forEach(b => {
     b.addEventListener("click", () => {
       $all(".sumTabBtn").forEach(x => x.classList.remove("active"));
@@ -813,7 +886,6 @@ function initAdminPage() {
     });
   });
 
-  // Summary Table/Graph toggle
   $("#sumViewTableBtn")?.addEventListener("click", () => {
     adminState.summary.mode = "table";
     setSummaryModeUI();
@@ -826,7 +898,6 @@ function initAdminPage() {
     renderAdminDailyUnitsSummary();
   });
 
-  // Download chart button (for summary chart)
   $("#downloadChartBtn")?.addEventListener("click", () => {
     if (!summaryChartInstance) return;
     const a = document.createElement("a");
@@ -835,7 +906,6 @@ function initAdminPage() {
     a.click();
   });
 
-  // Last 10 days Table/Graph toggle
   $("#last10TableBtn")?.addEventListener("click", () => {
     adminState.last10.mode = "table";
     setLast10ModeUI();
@@ -847,7 +917,6 @@ function initAdminPage() {
     renderAdminLast10Days();
   });
 
-  /* ✅ NEW: Last 15 days fixed window auto filter (From -> auto To) */
   bindAutoFixedWindowFilter({
     fromSel: "#last10FromAdmin",
     toSel: "#last10ToAdmin",
@@ -856,7 +925,6 @@ function initAdminPage() {
     onChange: () => renderAdminLast10Days(),
   });
 
-  /* ✅ NEW: default last 15 days = today-14 to today */
   (function setDefaultLast10Range() {
     const fromEl = $("#last10FromAdmin");
     const toEl = $("#last10ToAdmin");
@@ -876,7 +944,6 @@ function initAdminPage() {
     toEl.max = to;
   })();
 
-  // Maintenance auto date filter + pagination
   bindAutoDateFilter({
     fromSel: "#mntFromAdmin",
     toSel: "#mntToAdmin",
@@ -893,7 +960,6 @@ function initAdminPage() {
     renderAdminMaintenance();
   });
 
-  // Photos auto date filter + pagination
   bindAutoDateFilter({
     fromSel: "#phoFromAdmin",
     toSel: "#phoToAdmin",
@@ -928,7 +994,6 @@ function setSummaryModeUI() {
   $("#downloadChartBtn")?.classList.toggle("hidden", !isGraph);
   $("#sumGraphWrap")?.classList.toggle("hidden", !isGraph);
 
-  // Hide both tab tables when graph mode
   $("#sumMonthlyTableWrap")?.classList.toggle("hidden", isGraph);
   $("#sumYearlyTableWrap")?.classList.toggle("hidden", isGraph);
 }
@@ -944,12 +1009,44 @@ function setLast10ModeUI() {
 /* =========================
    DATA HELPERS (GEN)
 ========================= */
-function getAllGenRows() {
-  return lsGet(LS_KEYS.GEN, []).slice().sort((a, b) => a.isoDate.localeCompare(b.isoDate));
+async function getAllGenRows() {
+  const res = await fetch(GEN_API_URL);
+  if (!res.ok) throw new Error("GEN API failed: " + res.status);
+
+  const raw = await res.json();
+  const rows = Array.isArray(raw) ? raw : [];
+
+  const pick = (obj, keyName) => {
+    const k = Object.keys(obj || {}).find(k => String(k).trim() === String(keyName).trim());
+    return k ? obj[k] : "";
+  };
+
+  const out = [];
+
+  for (const r of rows) {
+    const isoDate = String(pick(r, "Date") || "").trim();
+    if (!isoDate) continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) continue;
+
+    const ashRaw = pick(r, "Ashiana Generation Units (kWh)");
+    const darRaw = pick(r, "Darpan Generation Units (kWh)");
+
+    const ash = ashRaw === "" ? NaN : Number(ashRaw);
+    const dar = darRaw === "" ? NaN : Number(darRaw);
+
+    const ts = new Date(pick(r, "Timestamp")).getTime() || 0;
+    const userId = String(pick(r, "User ID") || pick(r, "  User ID  ") || "").trim();
+
+    if (ashRaw !== "" && !Number.isNaN(ash)) out.push({ isoDate, plant: "Ashiyana", units: ash, ts, userId });
+    if (darRaw !== "" && !Number.isNaN(dar)) out.push({ isoDate, plant: "Darpan", units: dar, ts, userId });
+  }
+
+  out.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  return out;
 }
 
 function groupByDate(rows) {
-  const map = new Map(); // date -> {Ashiyana, Darpan}
+  const map = new Map();
   for (const r of rows) {
     if (!map.has(r.isoDate)) map.set(r.isoDate, { Ashiyana: 0, Darpan: 0 });
     const obj = map.get(r.isoDate);
@@ -969,7 +1066,7 @@ function getLastNDates(n) {
     const dd = pad2(x.getDate());
     dates.push(`${yyyy}-${mm}-${dd}`);
   }
-  return dates; // desc order
+  return dates;
 }
 
 function fmtShortDate(iso) {
@@ -981,9 +1078,14 @@ function fmtShortDate(iso) {
 /* =========================
    ADMIN: DAILY UNITS SUMMARY
 ========================= */
-function renderAdminDailyUnitsSummary() {
-  const rows = getAllGenRows();
-  groupByDate(rows);
+async function renderAdminDailyUnitsSummary() {
+  let rows = [];
+  try {
+    rows = await getAllGenRows();
+  } catch (e) {
+    console.error(e);
+    rows = [];
+  }
 
   renderAdminPeriodTotals(rows);
   renderAdminMonthlyTableCurrentYear(rows);
@@ -997,7 +1099,7 @@ function renderAdminDailyUnitsSummary() {
 function renderAdminPeriodTotals(rows) {
   const today = nowStamp().isoDate;
   const y = today.slice(0, 4);
-  const ym = today.slice(0, 7); // YYYY-MM
+  const ym = today.slice(0, 7);
 
   const sum = (filterFn, plant) =>
     rows.filter(r => filterFn(r) && r.plant === plant).reduce((s, r) => s + Number(r.units || 0), 0);
@@ -1036,7 +1138,7 @@ function renderAdminMonthlyTableCurrentYear(rows) {
 
   const now = new Date();
   const curYear = now.getFullYear();
-  const curMonth = now.getMonth() + 1; // 1..12
+  const curMonth = now.getMonth() + 1;
 
   const monthNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   const monthMap = new Map();
@@ -1080,7 +1182,7 @@ function renderAdminMonthlyTableCurrentYear(rows) {
 }
 
 function renderAdminYearlyTable(rows) {
-  const map = new Map(); // year -> {A,D}
+  const map = new Map();
   for (const r of rows) {
     const yr = r.isoDate.slice(0, 4);
     if (!map.has(yr)) map.set(yr, { Ashiyana: 0, Darpan: 0 });
@@ -1152,22 +1254,26 @@ function renderSummaryChartForTab(rows) {
 }
 
 /* =========================
-   ADMIN: LAST 15 DAYS (FIXED RANGE)
+   ADMIN: LAST 15 DAYS
 ========================= */
-function renderAdminLast10Days() {
-  const rows = getAllGenRows();
-  const byDate = groupByDate(rows);
+async function renderAdminLast10Days() {
+  let rows = [];
+  try {
+    rows = await getAllGenRows();
+  } catch (e) {
+    console.error(e);
+    rows = [];
+  }
 
-  const n = adminState.last10.days || 15;
+  const byDate = groupByDate(rows);
 
   let dates = [];
   if (adminState.last10.from && adminState.last10.to) {
     dates = buildDateList(adminState.last10.from, adminState.last10.to);
   } else {
-    dates = getLastNDates(n).slice().reverse();
+    dates = getLastNDates(adminState.last10.days || 15).slice().reverse();
   }
 
-  // latest first
   dates = dates.slice().sort((a, b) => b.localeCompare(a));
 
   const body = $("#adminLast10Body");
@@ -1211,24 +1317,8 @@ function renderStackChart(canvasSel, instanceKey, labels, aData, dData, title) {
     data: {
       labels,
       datasets: [
-        {
-          label: "Ashiyana",
-          data: aData,
-          backgroundColor: "rgba(37,199,199,.55)",
-          borderColor: "rgba(37,199,199,.9)",
-          borderWidth: 1,
-          borderRadius: 6,
-          stack: "stack1"
-        },
-        {
-          label: "Darpan",
-          data: dData,
-          backgroundColor: "rgba(11,42,60,.50)",
-          borderColor: "rgba(11,42,60,.85)",
-          borderWidth: 1,
-          borderRadius: 6,
-          stack: "stack1"
-        }
+        { label: "Ashiyana", data: aData, backgroundColor: "rgba(37,199,199,.55)", borderColor: "rgba(37,199,199,.9)", borderWidth: 1, borderRadius: 6, stack: "stack1" },
+        { label: "Darpan", data: dData, backgroundColor: "rgba(11,42,60,.50)", borderColor: "rgba(11,42,60,.85)", borderWidth: 1, borderRadius: 6, stack: "stack1" }
       ]
     },
     options: {
@@ -1258,14 +1348,59 @@ function renderStackChart(canvasSel, instanceKey, labels, aData, dData, title) {
 }
 
 /* =========================
-   ADMIN: MAINTENANCE (AUTO FILTER + PAGINATION)
+   ADMIN: MAINTENANCE
+   ✅ If MNT_API_URL exists => fetch sheet
+   ✅ else fallback LS
 ========================= */
-function renderAdminMaintenance() {
+async function renderAdminMaintenance() {
   const state = adminState.mnt;
+  let all = [];
 
-  const all = lsGet(LS_KEYS.MNT, [])
-    .filter(r => withinDateRange(r.isoDate, state.from, state.to))
-    .sort((a, b) => b.createdAt - a.createdAt);
+  if (MNT_API_URL) {
+    try {
+      const res = await fetch(MNT_API_URL);
+      const rows = await res.json();
+
+      const isValidISO = (d) => /^\d{4}-\d{2}-\d{2}$/.test(String(d || "").trim());
+
+      all = (Array.isArray(rows) ? rows : [])
+        // ✅ remove header/test/junk rows
+        .filter(r => isValidISO(r["Date"]))
+        // ✅ date filter
+        .filter(r => withinDateRange(String(r["Date"]).trim(), state.from, state.to))
+        // ✅ normalize
+        .map(r => {
+          const isoDate = String(r["Date"]).trim();
+          const ts = new Date(r["Timestamp"]).getTime() || 0;
+
+          return {
+            isoDate,
+            userId: String(r["User Id"] || "").trim(),
+            userName: "", // (optional: map from users list if you want)
+            plant: String(r["Select Plant"] || "").trim(),
+            omStaff: String(r["O&M Staff Present (count)"] ?? "").trim(),
+            securityCount: String(r["Security Present (count)"] ?? "").trim(),
+            cleaningHours: String(r["Cleaning Hours"] ?? "").trim(),
+            breakdown: String(r["Breakdown?"] || "").trim(),
+            breakdownHours: String(r["Breakdown Hours"] ?? "").trim(),
+            breakdownFrom: String(r["Breakdown Time Range -from"] ?? "").trim(),
+            breakdownTo: String(r["Breakdown Time Range -to"] ?? "").trim(),
+            breakdownReason: String(r["Breakdown Reason"] ?? "").trim(),
+            ts
+          };
+        })
+        .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+
+    } catch (e) {
+      console.error("Admin MNT fetch failed:", e);
+      all = [];
+    }
+  } else {
+    // fallback local (unchanged)
+    all = lsGet(LS_KEYS.MNT, [])
+      .filter(r => withinDateRange(r.isoDate, state.from, state.to))
+      .sort((a, b) => b.createdAt - a.createdAt);
+  }
 
   const paged = paginate(all, state.page, state.perPage);
   adminState.mnt.page = paged.page;
@@ -1276,7 +1411,7 @@ function renderAdminMaintenance() {
       paged.items.map(r => `
         <tr>
           <td>${r.isoDate}</td>
-          <td>${r.userName || ""}</td>
+          <td>${r.userName || r.userId || ""}</td>
           <td>${r.plant || ""}</td>
           <td class="right">${r.omStaff ?? ""}</td>
           <td class="right">${r.securityCount ?? ""}</td>
@@ -1296,7 +1431,7 @@ function renderAdminMaintenance() {
 }
 
 /* =========================
-   ADMIN: PHOTOS (3 PER PAGE + AUTO FILTER + PAGINATION)
+   ADMIN: PHOTOS (local)
 ========================= */
 function renderAdminPhotos() {
   const state = adminState.pho;
@@ -1395,4 +1530,3 @@ function photoMeta(p) {
 
   window.addEventListener("scroll", onScroll, { passive: true });
 })();
-
