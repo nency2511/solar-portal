@@ -17,64 +17,93 @@
 
   <!-- ✅ Only login card in center -->
   <div class="loginOnlyWrap">
-    <div class="loginOnlyCard">
-      <div class="loginBrand">
-        <div class="logoSun">
-          <div class="ray r1"></div><div class="ray r2"></div><div class="ray r3"></div><div class="ray r4"></div>
-          <div class="ray r5"></div><div class="ray r6"></div><div class="ray r7"></div><div class="ray r8"></div>
-          <div class="sunCore"></div>
-        </div>
+  <div class="loginOnlyCard">
+    <div class="loginBrand">
 
-        <div>
-          <div class="loginTitle">Solar Portal</div>
-          <div class="loginSub">User / Admin Login</div>
+      <!-- LOGO (slightly smaller) -->
+      <div class="logoWrap" style="
+        width:48px;
+        height:48px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:#fff;
+        border-radius:10px;
+        box-shadow:0 6px 18px rgba(0,0,0,0.12);
+      ">
+        <img 
+          src="https://www.friendssteel.com/wp-content/uploads/2020/04/logo.png"
+          alt="Solar Portal Logo"
+          style="max-width:85%; max-height:85%; object-fit:contain;"
+        />
+      </div>
+
+      <!-- TEXT (Solar Portal slightly bigger & bolder) -->
+      <div style="margin-left:12px;">
+        <div class="loginTitle" style="
+          font-size:24px;
+          font-weight:800;
+          letter-spacing:0.4px;
+        ">
+          Solar Portal
+        </div>
+        <div class="loginSub" style="
+          font-size:13px;
+          font-weight:500;
+          opacity:0.75;
+          margin-top:2px;
+        ">
+          User / Admin Login
         </div>
       </div>
 
-      <!-- Tabs -->
-      <div class="segmented" style="margin-top:14px;">
-        <button class="segBtn active" id="tabUser" type="button">User</button>
-        <button class="segBtn" id="tabAdmin" type="button">Admin</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="segmented" style="margin-top:14px;">
+      <button class="segBtn active" id="tabUser" type="button">User</button>
+      <button class="segBtn" id="tabAdmin" type="button">Admin</button>
+    </div>
+
+    <!-- USER LOGIN -->
+    <form id="userLoginForm" class="form">
+      <div class="field">
+        <label>User ID</label>
+        <input id="userId" placeholder="e.g. u101" required />
       </div>
-
-      <!-- USER LOGIN -->
-      <form id="userLoginForm" class="form">
-        <div class="field">
-          <label>User ID</label>
-          <input id="userId" placeholder="e.g. u101" required />
-        </div>
-        <div class="field">
-          <label>Password</label>
-          <input id="userPass" type="password" placeholder="Enter password" required />
-        </div>
-        <button class="btnPrimary" type="submit">
-          <span>Login</span>
-          <span class="btnArrow">→</span>
-        </button>
-      </form>
-
-      <!-- ADMIN LOGIN -->
-      <form id="adminLoginForm" class="form hidden">
-        <div class="field">
-          <label>Email</label>
-          <input id="adminEmail" type="email" placeholder="admin@solar.com" required />
-        </div>
-        <div class="field">
-          <label>Password</label>
-          <input id="adminPass" type="password" placeholder="Enter password" required />
-        </div>
-        <button class="btnPrimary" type="submit">
-          <span>Login</span>
-          <span class="btnArrow">→</span>
-        </button>
-      </form>
-
-      <div class="loginFoot">
-        <span class="dot"></span>
-        <span class="muted">Secure access • Local demo storage</span>
+      <div class="field">
+        <label>Password</label>
+        <input id="userPass" type="password" placeholder="Enter password" required />
       </div>
+      <button class="btnPrimary" type="submit">
+        <span>Login</span>
+        <span class="btnArrow">→</span>
+      </button>
+    </form>
+
+    <!-- ADMIN LOGIN -->
+    <form id="adminLoginForm" class="form hidden">
+      <div class="field">
+        <label>Email</label>
+        <input id="adminEmail" type="email" placeholder="admin@solar.com" required />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input id="adminPass" type="password" placeholder="Enter password" required />
+      </div>
+      <button class="btnPrimary" type="submit">
+        <span>Login</span>
+        <span class="btnArrow">→</span>
+      </button>
+    </form>
+
+    <div class="loginFoot">
+      <span class="dot"></span>
+      <span class="muted">Secure access • Local demo storage</span>
     </div>
   </div>
+</div>
+
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="app.js"></script>
