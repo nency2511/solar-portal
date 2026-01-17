@@ -1170,3 +1170,19 @@ body[data-page="admin"] .tableWrap{
   height: 50px;
   object-fit: contain;
 }
+
+
+
+/* ✅ FIX: Allow table scroll on mobile (Admin Maintenance table) */
+body[data-page="admin"] #sec-amnt .tableWrap{
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;          /* ✅ helps on mobile */
+}
+
+/* ✅ make sure table is wider than container so it can scroll */
+body[data-page="admin"] #sec-amnt .tableWrap .tbl{
+  width: max-content !important;
+  min-width: 900px !important;  /* maintenance is big */
+}
