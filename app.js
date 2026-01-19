@@ -28,6 +28,9 @@ const MNT_API_URL =
   "https://script.google.com/macros/s/AKfycbx1gXmBGZZanCvVMsrEI5KAYn6sdscMwjz4i44O8A6Qf5O5NvmJxk6nHUA5-VEWspQGNQ/exec";
  // <-- paste maintenance sheet API here (optional)
 
+const PHOTO_WEBHOOK_URL = "https://fsgdme.app.n8n.cloud/webhook-test/83c53409-1837-4ae3-8952-c2f1a036f8fd";
+
+ 
 const LS_KEYS = {
   USERS: "sp_users",
   ADMIN: "sp_admin",
@@ -605,36 +608,58 @@ function initUserPage() {
     imgPreviewWrap?.classList.remove("hidden");
   });
 
-  $("#photoForm")?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const t = nowStamp();
+ $("#photoForm")?.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    const period = $("#photoPeriod").value;
-    const plant = document.querySelector('input[name="plantPhoto"]:checked')?.value || "Ashiyana";
-    const files = photoFile.files ? Array.from(photoFile.files) : [];
-    if (!files.length) return toastErr("No file", "Please choose image(s).");
+  const t = nowStamp();
+  const sess = getSession();
+  const loggedUserId = sess?.userId || "";
+  if (!loggedUserId) return toastErr("Session missing", "Please login again.");
 
-    const entries = lsGet(LS_KEYS.PHO, []);
+  const period = $("#photoPeriod").value;
+  const plant = document.querySelector('input[name="plantPhoto"]:checked')?.value || "Ashiana";
+
+  const photoFile = $("#photoFile");
+  const files = photoFile?.files ? Array.from(photoFile.files) : [];
+  if (!files.length) return toastErr("No file", "Please choose image(s).");
+
+  try {
+    const fd = new FormData();
+
+    // ✅ metadata fields
+    fd.append("userId", loggedUserId);
+    fd.append("userName", ($("#profileName")?.textContent || "").trim());
+    fd.append("date", $("#photoDate")?.value || t.isoDate);
+    fd.append("period", period);
+    fd.append("plant", plant);
+
+    // ✅ IMPORTANT: key name must match n8n "Field Name for Binary Data" = photos
     for (const f of files) {
-      const b64 = await toBase64(f);
-      entries.push({
-        id: cryptoId(), userId: me.id, userName: me.name,
-        plant, period, imageData: b64,
-        isoDate: t.isoDate, time: t.time, timestamp: t.display,
-        createdAt: Date.now()
-      });
+      fd.append("photos", f, f.name);
     }
-    lsSet(LS_KEYS.PHO, entries);
 
+    const res = await fetch(PHOTO_WEBHOOK_URL, {
+      method: "POST",
+      body: fd,
+    });
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new Error(`Upload failed: ${res.status} ${text}`);
+    }
+
+    // success
     $("#photoPeriod").value = "Daily";
     photoFile.value = "";
-    imgPreviewWrap?.classList.add("hidden");
-    fillUserDatesOnly();
+    $("#imgPreviewWrap")?.classList.add("hidden");
 
-    userViewState.pho.page = 1;
-    renderUserPhotos(me.id);
-    toastOk("Saved!", "Photograph(s) stored successfully.");
-  });
+    toastOk("Uploaded!", "Photos sent to n8n successfully.");
+  } catch (err) {
+    console.error(err);
+    toastErr("Failed", "Could not upload photos. Please try again.");
+  }
+});
+
 
   bindAutoDateFilter({ fromSel: "#genFrom", toSel: "#genTo", stateObj: userViewState.gen, onChange: () => renderUserTables(me.id) });
   bindAutoDateFilter({ fromSel: "#mntFrom", toSel: "#mntTo", stateObj: userViewState.mnt, onChange: () => renderUserTables(me.id) });
@@ -697,6 +722,27 @@ async function renderUserTables(userId) {
     }
 
     genAll.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+
+
+    // ✅ Auto-fill Gen date filters (From = earliest entry, To = today) — only once
+const fromEl = $("#genFrom");
+const toEl = $("#genTo");
+
+if (!gState.from && !gState.to) {
+  const today = nowStamp().isoDate;
+
+  // earliest date from all user entries
+  const minDate = genAll.length
+    ? genAll.reduce((min, r) => (r.isoDate < min ? r.isoDate : min), genAll[0].isoDate)
+    : today;
+
+  gState.from = minDate;
+  gState.to = today;
+
+  if (fromEl) fromEl.value = minDate;
+  if (toEl) toEl.value = today;
+}
+
   } catch (err) {
     console.error("GEN fetch failed:", err);
     genAll = [];
@@ -757,6 +803,23 @@ async function renderUserTables(userId) {
           ts: new Date(r["Timestamp"]).getTime() || 0,
         }))
         .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+// ✅ Auto-fill Maintenance date filters (From = earliest log, To = today) — only once
+const mFromEl = $("#mntFrom");
+const mToEl = $("#mntTo");
+
+if (!mState.from && !mState.to) {
+  const today = nowStamp().isoDate;
+
+  const minDate = mntAll.length
+    ? mntAll.reduce((min, r) => (r.isoDate < min ? r.isoDate : min), mntAll[0].isoDate)
+    : today;
+
+  mState.from = minDate;
+  mState.to = today;
+
+  if (mFromEl) mFromEl.value = minDate;
+  if (mToEl) mToEl.value = today;
+}
 
     } catch (e) {
       console.error("MNT fetch failed:", e);
@@ -804,6 +867,25 @@ function renderUserPhotos(userId) {
 
   const paged = paginate(listAll, pState.page, pState.perPage);
   userViewState.pho.page = paged.page;
+// ✅ Auto-fill Photo date filters
+// From = earliest photo date (if any), else Today
+// To = Today
+const pFromEl = $("#phoFrom");
+const pToEl = $("#phoTo");
+
+if (!pState.from && !pState.to) {
+  const today = nowStamp().isoDate;
+
+  const minDate = listAll.length
+    ? listAll.reduce((min, r) => (r.isoDate < min ? r.isoDate : min), listAll[0].isoDate)
+    : today;
+
+  pState.from = minDate;
+  pState.to = today;
+
+  if (pFromEl) pFromEl.value = minDate;
+  if (pToEl) pToEl.value = today;
+}
 
   const grid = $("#userPhotoGrid");
   if (!grid) return;
