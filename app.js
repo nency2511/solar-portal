@@ -29,6 +29,8 @@ const MNT_API_URL =
  // <-- paste maintenance sheet API here (optional)
 
 const PHOTO_WEBHOOK_URL = "https://fsgdme.app.n8n.cloud/webhook/83c53409-1837-4ae3-8952-c2f1a036f8fd";
+const PHOTO_API_URL =
+  "https://script.google.com/macros/s/AKfycbyb7BW0xLN2siAcbm7E0IiHe1dc02km0QZ3FgQWzsLmEzeAc6ce0LkaODPYafajmEAN/exec";
 
  
 const LS_KEYS = {
@@ -1517,14 +1519,41 @@ async function renderAdminMaintenance() {
 /* =========================
    ADMIN: PHOTOS (local)
 ========================= */
-function renderAdminPhotos() {
+async function renderAdminPhotos() {
   const state = adminState.pho;
 
-  const all = lsGet(LS_KEYS.PHO, [])
-    .filter(r => withinDateRange(r.isoDate, state.from, state.to))
-    .sort((a, b) => b.createdAt - a.createdAt);
+  let all = [];
+  try {
+    all = await fetchAdminPhotosFromSheet();
+  } catch (e) {
+    console.error("Admin PHOTO fetch failed:", e);
+    all = [];
+  }
 
-  const paged = paginate(all, state.page, state.perPage);
+  // ✅ Auto-fill default range ONLY ONCE:
+  // From = earliest photo date, To = today
+  const fromEl = $("#phoFromAdmin");
+  const toEl = $("#phoToAdmin");
+
+  if (!state.from && !state.to) {
+    const today = nowStamp().isoDate;
+
+    const minDate = all.length
+      ? all.reduce((min, r) => (r.isoDate < min ? r.isoDate : min), all[0].isoDate)
+      : today;
+
+    state.from = minDate;
+    state.to = today;
+
+    if (fromEl) fromEl.value = minDate;
+    if (toEl) toEl.value = today;
+  }
+
+  // ✅ Apply date filter
+  const filtered = all.filter(r => withinDateRange(r.isoDate, state.from, state.to));
+
+  // ✅ paginate (3 per page already in your state)
+  const paged = paginate(filtered, state.page, state.perPage);
   adminState.pho.page = paged.page;
 
   const grid = $("#adminPhotoGrid");
@@ -1534,11 +1563,11 @@ function renderAdminPhotos() {
     grid.innerHTML = `<div class="muted">No photos found.</div>`;
   } else {
     grid.innerHTML = paged.items.map(p => `
-      <div class="photoCard" data-img="${escapeAttr(p.imageData)}" data-meta="${escapeAttr(photoMeta(p))}">
-        <img src="${p.imageData}" alt="photo"/>
+      <div class="photoCard" data-img="${escapeAttr(p.imageUrl)}" data-meta="${escapeAttr(photoMeta(p))}">
+        <img src="${escapeAttr(p.imageUrl)}" alt="photo"/>
         <div class="photoMeta">
-          <div class="t">${p.period} • ${p.plant}</div>
-          <div class="s">${p.userName} • ${p.timestamp}</div>
+          <div class="t">${escapeAttr(p.plant)}</div>
+          <div class="s">${escapeAttr(p.userName)} • ${escapeAttr(p.timestamp)}</div>
         </div>
       </div>
     `).join("");
@@ -1546,10 +1575,13 @@ function renderAdminPhotos() {
   }
 
   $("#adminPhotoCount") && ($("#adminPhotoCount").textContent = `${paged.total} items`);
-  $("#phoPageInfoAdmin") && ($("#phoPageInfoAdmin").textContent = `Page ${paged.page} / ${paged.totalPages} • ${paged.total} items`);
+  $("#phoPageInfoAdmin") && ($("#phoPageInfoAdmin").textContent =
+    `Page ${paged.page} / ${paged.totalPages} • ${paged.total} items`);
+
   $("#phoPrevAdmin") && ($("#phoPrevAdmin").disabled = paged.page <= 1);
   $("#phoNextAdmin") && ($("#phoNextAdmin").disabled = paged.page >= paged.totalPages);
 }
+
 
 /* =========================
    IMAGE MODAL
@@ -1580,7 +1612,7 @@ function bindPhotoCards(container) {
 }
 
 function photoMeta(p) {
-  return `${p.userName} (${p.userId}) • ${p.period} • ${p.plant} • ${p.timestamp}`;
+  return `${p.userName} • ${p.plant} • ${p.timestamp}`;
 }
 
 /* =========================
@@ -1614,4 +1646,91 @@ function photoMeta(p) {
 
   window.addEventListener("scroll", onScroll, { passive: true });
 })();
+
+
+
+// photograph fetching helper in admin view 
+function parseDmyTimestampToMs(s) {
+  // "20/01/2026 11:08:08"
+  const str = String(s || "").trim();
+  const m = str.match(/^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2}):(\d{2})$/);
+  if (!m) return 0;
+  const dd = Number(m[1]), mm = Number(m[2]), yyyy = Number(m[3]);
+  const hh = Number(m[4]), mi = Number(m[5]), ss = Number(m[6]);
+  return new Date(yyyy, mm - 1, dd, hh, mi, ss).getTime() || 0;
+}
+
+function driveToImgSrc(url) {
+  const u = String(url || "").trim();
+  if (!u) return "";
+
+  let id = "";
+  const m1 = u.match(/\/file\/d\/([^/]+)/);
+  if (m1?.[1]) id = m1[1];
+
+  if (!id) {
+    const m2 = u.match(/[?&]id=([^&]+)/);
+    if (m2?.[1]) id = m2[1];
+  }
+
+  if (!id) return u;
+
+  // ✅ Thumbnail works better for previews
+  return `https://drive.google.com/thumbnail?id=${id}&sz=w1000`;
+}
+
+
+function pickAny(obj, keys) {
+  const map = obj || {};
+  for (const k of keys) {
+    if (k in map) return map[k];
+  }
+  // fallback: case-insensitive match
+  const lower = Object.keys(map).reduce((a, x) => (a[x.toLowerCase()] = x, a), {});
+  for (const k of keys) {
+    const real = lower[String(k).toLowerCase()];
+    if (real) return map[real];
+  }
+  return "";
+}
+
+async function fetchAdminPhotosFromSheet() {
+  const res = await fetch(PHOTO_API_URL, { method: "GET" });
+  if (!res.ok) throw new Error("PHOTO API failed: " + res.status);
+
+  const raw = await res.json();
+  const rows = Array.isArray(raw) ? raw : [];
+
+  const out = [];
+
+  for (const r of rows) {
+    const isoDate = String(pickAny(r, ["DATE", "Date", "date"])).trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) continue;
+
+    const userName = String(pickAny(r, ["USER NAME", "User Name", "USER_NAME", "userName"])).trim();
+    const plant = String(pickAny(r, ["PLANT", "Plant", "plant"])).trim();
+    const period = String(pickAny(r, ["PERIOD", "Period", "period"])).trim();
+
+    const tsText = String(pickAny(r, ["TIMESTAMP", "Timestamp", "timestamp"])).trim();
+    const ts = parseDmyTimestampToMs(tsText);
+
+    const fileStr = String(pickAny(r, ["FILE", "File", "file"])).trim();
+    const links = fileStr.split(",").map(x => x.trim()).filter(Boolean);
+
+    for (const link of links) {
+      out.push({
+        isoDate,
+        userName,
+        plant,
+        period,
+        timestamp: tsText,
+        ts,
+        imageUrl: driveToImgSrc(link),
+      });
+    }
+  }
+
+  out.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  return out;
+}
 
