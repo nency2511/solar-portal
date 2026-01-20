@@ -28,7 +28,7 @@ const MNT_API_URL =
   "https://script.google.com/macros/s/AKfycbx1gXmBGZZanCvVMsrEI5KAYn6sdscMwjz4i44O8A6Qf5O5NvmJxk6nHUA5-VEWspQGNQ/exec";
  // <-- paste maintenance sheet API here (optional)
 
-const PHOTO_WEBHOOK_URL = "https://fsgdme.app.n8n.cloud/webhook-test/83c53409-1837-4ae3-8952-c2f1a036f8fd";
+const PHOTO_WEBHOOK_URL = "https://fsgdme.app.n8n.cloud/webhook/83c53409-1837-4ae3-8952-c2f1a036f8fd";
 
  
 const LS_KEYS = {
@@ -1614,3 +1614,4 @@ function photoMeta(p) {
 
   window.addEventListener("scroll", onScroll, { passive: true });
 })();
+
