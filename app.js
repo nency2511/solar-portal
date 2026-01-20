@@ -42,7 +42,7 @@ const LS_KEYS = {
   PHO: "sp_photo_entries",
 };
 
-const ADMIN_STATIC = { email: "admin@solar.com", password: "Admin@123", name: "Solar Admin" };
+const ADMIN_STATIC = { email: "admin@solar.com", password: "Admin@1234", name: "Solar Admin" };
 
 function $(sel, root = document) { return root.querySelector(sel); }
 function $all(sel, root = document) { return Array.from(root.querySelectorAll(sel)); }
@@ -1798,3 +1798,4 @@ async function fetchUserPhotosFromSheet(userId) {
   out.sort((a, b) => (b.ts || 0) - (a.ts || 0));
   return out;
 }
+
