@@ -405,14 +405,21 @@ function initUserPage() {
   });
 
   $all(".navBtn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      $all(".navBtn").forEach(b => b.classList.remove("active"));
-      btn.classList.add("active");
-      const sec = btn.dataset.section;
-      $all(".panel").forEach(p => p.classList.remove("show"));
-      $("#sec-" + sec)?.classList.add("show");
-      fillUserDatesOnly();
-    });
+   btn.addEventListener("click", () => {
+  $all(".navBtn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+
+  const sec = btn.dataset.section;
+  $all(".panel").forEach(p => p.classList.remove("show"));
+  $("#sec-" + sec)?.classList.add("show");
+
+  fillUserDatesOnly();
+
+  // ✅ refresh on open
+  if (sec === "pho") renderUserPhotos(me.id);
+  if (sec === "gen" || sec === "mnt") renderUserTables(me.id);
+});
+
   });
 
   function fillUserDatesOnly() {
@@ -860,34 +867,41 @@ if (!mState.from && !mState.to) {
   $("#mntNext") && ($("#mntNext").disabled = mntPaged.page >= mntPaged.totalPages);
 }
 
-function renderUserPhotos(userId) {
+async function renderUserPhotos(userId) {
   const pState = userViewState.pho;
-  const listAll = lsGet(LS_KEYS.PHO, [])
-    .filter(x => x.userId === userId)
-    .filter(x => withinDateRange(x.isoDate, pState.from, pState.to))
-    .sort((a, b) => b.createdAt - a.createdAt);
 
-  const paged = paginate(listAll, pState.page, pState.perPage);
+  let all = [];
+  try {
+    all = await fetchUserPhotosFromSheet(userId);
+  } catch (e) {
+    console.error("User PHOTO fetch failed:", e);
+    all = [];
+  }
+
+  // ✅ Auto-fill Photo date filters (From = earliest photo date, To = today) — only once
+  const pFromEl = $("#phoFrom");
+  const pToEl = $("#phoTo");
+
+  if (!pState.from && !pState.to) {
+    const today = nowStamp().isoDate;
+
+    const minDate = all.length
+      ? all.reduce((min, r) => (r.isoDate < min ? r.isoDate : min), all[0].isoDate)
+      : today;
+
+    pState.from = minDate;
+    pState.to = today;
+
+    if (pFromEl) pFromEl.value = minDate;
+    if (pToEl) pToEl.value = today;
+  }
+
+  // ✅ date filter
+  const filtered = all.filter(r => withinDateRange(r.isoDate, pState.from, pState.to));
+
+  // ✅ paginate
+  const paged = paginate(filtered, pState.page, pState.perPage);
   userViewState.pho.page = paged.page;
-// ✅ Auto-fill Photo date filters
-// From = earliest photo date (if any), else Today
-// To = Today
-const pFromEl = $("#phoFrom");
-const pToEl = $("#phoTo");
-
-if (!pState.from && !pState.to) {
-  const today = nowStamp().isoDate;
-
-  const minDate = listAll.length
-    ? listAll.reduce((min, r) => (r.isoDate < min ? r.isoDate : min), listAll[0].isoDate)
-    : today;
-
-  pState.from = minDate;
-  pState.to = today;
-
-  if (pFromEl) pFromEl.value = minDate;
-  if (pToEl) pToEl.value = today;
-}
 
   const grid = $("#userPhotoGrid");
   if (!grid) return;
@@ -901,11 +915,13 @@ if (!pState.from && !pState.to) {
   }
 
   grid.innerHTML = paged.items.map(p => `
-    <div class="photoCard" data-img="${escapeAttr(p.imageData)}" data-meta="${escapeAttr(photoMeta(p))}">
-      <img src="${p.imageData}" alt="photo"/>
+    <div class="photoCard"
+         data-img="${escapeAttr(p.imageUrl)}"
+         data-meta="${escapeAttr(`${p.userName} • ${p.plant} • ${p.timestamp}`)}">
+      <img src="${escapeAttr(p.imageUrl)}" alt="photo"/>
       <div class="photoMeta">
-        <div class="t">${p.period} • ${p.plant}</div>
-        <div class="s">${p.isoDate} ${p.time}</div>
+        <div class="t">${escapeAttr(p.period)} • ${escapeAttr(p.plant)}</div>
+        <div class="s">${escapeAttr(p.userName)} • ${escapeAttr(p.timestamp)}</div>
       </div>
     </div>
   `).join("");
@@ -1734,3 +1750,51 @@ async function fetchAdminPhotosFromSheet() {
   return out;
 }
 
+// user side photograph fetch
+
+async function fetchUserPhotosFromSheet(userId) {
+  const uid = String(userId || "").trim();
+  if (!uid) return [];
+
+  const res = await fetch(PHOTO_API_URL, { method: "GET" });
+  if (!res.ok) throw new Error("PHOTO API failed: " + res.status);
+
+  const raw = await res.json();
+  const rows = Array.isArray(raw) ? raw : [];
+
+  const out = [];
+
+  for (const r of rows) {
+    const rowUid = String(pickAny(r, ["USERID", "UserId", "userId", "User ID"])).trim();
+    if (rowUid !== uid) continue;
+
+    const isoDate = String(pickAny(r, ["DATE", "Date", "date"])).trim();
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(isoDate)) continue;
+
+    const userName = String(pickAny(r, ["USER NAME", "User Name", "userName"])).trim();
+    const plant = String(pickAny(r, ["PLANT", "Plant", "plant"])).trim();
+    const period = String(pickAny(r, ["PERIOD", "Period", "period"])).trim();
+
+    const tsText = String(pickAny(r, ["TIMESTAMP", "Timestamp", "timestamp"])).trim();
+    const ts = parseDmyTimestampToMs(tsText);
+
+    const fileStr = String(pickAny(r, ["FILE", "File", "file"])).trim();
+    const links = fileStr.split(",").map(x => x.trim()).filter(Boolean);
+
+    for (const link of links) {
+      out.push({
+        isoDate,
+        userId: rowUid,
+        userName,
+        plant,
+        period,
+        timestamp: tsText,
+        ts,
+        imageUrl: driveToImgSrc(link), // thumbnail preview
+      });
+    }
+  }
+
+  out.sort((a, b) => (b.ts || 0) - (a.ts || 0));
+  return out;
+}
