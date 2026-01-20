@@ -1455,7 +1455,9 @@ function renderStackChart(canvasSel, instanceKey, labels, aData, dData, title) {
 ========================= */
 async function renderAdminMaintenance() {
   const state = adminState.mnt;
-  let all = [];
+
+  // 1) Load ALL rows first (no date filter here)
+  let allRows = [];
 
   if (MNT_API_URL) {
     try {
@@ -1464,12 +1466,8 @@ async function renderAdminMaintenance() {
 
       const isValidISO = (d) => /^\d{4}-\d{2}-\d{2}$/.test(String(d || "").trim());
 
-      all = (Array.isArray(rows) ? rows : [])
-        // ✅ remove header/test/junk rows
+      allRows = (Array.isArray(rows) ? rows : [])
         .filter(r => isValidISO(r["Date"]))
-        // ✅ date filter
-        .filter(r => withinDateRange(String(r["Date"]).trim(), state.from, state.to))
-        // ✅ normalize
         .map(r => {
           const isoDate = String(r["Date"]).trim();
           const ts = new Date(r["Timestamp"]).getTime() || 0;
@@ -1477,7 +1475,7 @@ async function renderAdminMaintenance() {
           return {
             isoDate,
             userId: String(r["User Id"] || "").trim(),
-            userName: "", // (optional: map from users list if you want)
+            userName: "", // optional
             plant: String(r["Select Plant"] || "").trim(),
             omStaff: String(r["O&M Staff Present (count)"] ?? "").trim(),
             securityCount: String(r["Security Present (count)"] ?? "").trim(),
@@ -1494,16 +1492,52 @@ async function renderAdminMaintenance() {
 
     } catch (e) {
       console.error("Admin MNT fetch failed:", e);
-      all = [];
+      allRows = [];
     }
   } else {
-    // fallback local (unchanged)
-    all = lsGet(LS_KEYS.MNT, [])
-      .filter(r => withinDateRange(r.isoDate, state.from, state.to))
-      .sort((a, b) => b.createdAt - a.createdAt);
+    // fallback local
+    allRows = (lsGet(LS_KEYS.MNT, []) || [])
+      .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+      .map(x => ({
+        isoDate: x.isoDate,
+        userId: x.userId,
+        userName: x.userName || "",
+        plant: x.plant || "",
+        omStaff: x.omStaff ?? "",
+        securityCount: x.securityCount ?? "",
+        cleaningHours: x.cleaningHours ?? "",
+        breakdown: x.breakdown ?? "",
+        breakdownHours: x.breakdownHours ?? "",
+        breakdownFrom: x.breakdownFrom ?? "",
+        breakdownTo: x.breakdownTo ?? "",
+        breakdownReason: x.breakdownReason ?? "",
+        ts: x.createdAt || 0
+      }));
   }
 
-  const paged = paginate(all, state.page, state.perPage);
+  // 2) ✅ Set default From = earliest entry, To = today (ONLY ONCE)
+  const fromEl = $("#mntFromAdmin");
+  const toEl = $("#mntToAdmin");
+
+  if (!state.from && !state.to) {
+    const today = nowStamp().isoDate;
+
+    const minDate = allRows.length
+      ? allRows.reduce((min, r) => (r.isoDate < min ? r.isoDate : min), allRows[0].isoDate)
+      : today;
+
+    state.from = minDate;
+    state.to = today;
+
+    if (fromEl) fromEl.value = minDate;  // ✅ yyyy-mm-dd
+    if (toEl) toEl.value = today;        // ✅ yyyy-mm-dd
+  }
+
+  // 3) Now apply date filter
+  const filtered = allRows.filter(r => withinDateRange(r.isoDate, state.from, state.to));
+
+  // 4) paginate + render
+  const paged = paginate(filtered, state.page, state.perPage);
   adminState.mnt.page = paged.page;
 
   const body = $("#adminMntTable tbody");
@@ -1513,8 +1547,7 @@ async function renderAdminMaintenance() {
         <tr>
           <td>${r.isoDate}</td>
           <td>${r.userName || r.userId || ""}</td>
-        <td>${r.plant === "Ashiana" ? "Aashiana" : r.plant}</td>
-
+          <td>${r.plant === "Ashiana" ? "Aashiana" : r.plant}</td>
           <td class="right">${r.omStaff ?? ""}</td>
           <td class="right">${r.securityCount ?? ""}</td>
           <td class="right">${r.cleaningHours ?? ""}</td>
@@ -1798,4 +1831,3 @@ async function fetchUserPhotosFromSheet(userId) {
   out.sort((a, b) => (b.ts || 0) - (a.ts || 0));
   return out;
 }
-
