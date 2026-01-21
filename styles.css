@@ -1,6 +1,8 @@
 /* =========================
    Solar Portal Styles (BOLD THEME + strong table borders)
    Common CSS for all pages
+   ✅ FINAL CLEAN VERSION
+   ✅ Only TABLES scroll horizontally (page never scrolls)
 ========================= */
 
 :root{
@@ -27,12 +29,16 @@
 *{box-sizing:border-box}
 html,body{height:100%}
 
+/* ✅ Stop full-page horizontal scrolling ALWAYS */
+html, body{
+  overflow-x: hidden !important;
+}
+
 body{
   margin:0;
   font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   color:var(--text);
   background: var(--page);
-  overflow-x:hidden;
 }
 
 /* subtle background texture */
@@ -45,9 +51,6 @@ body{
   pointer-events:none;
   animation: floaty 9s ease-in-out infinite;
 }
-/* .orb1{left:-160px; top:-160px; background:rgba(0,229,255,.48)} */
-/* .orb2{right:-190px; top:120px; background:rgba(124,58,237,.32); animation-delay:1.2s} */
-/* .orb3{left:35%; bottom:-240px; background:rgba(255,45,85,.22); animation-delay:2.1s} */
 
 @keyframes floaty{
   0%,100%{transform:translateY(0) translateX(0) scale(1)}
@@ -57,7 +60,6 @@ body{
 .hidden{display:none !important;}
 .muted{color:var(--muted)}
 .small{font-size:12px}
-/* .right{text-align:right} */
 
 /* LOGIN top */
 .topbar{
@@ -177,6 +179,7 @@ input, select{
   padding: 0 12px;
   outline:none;
   transition:.2s;
+  max-width: 100%;
 }
 input:focus, select:focus{
   border-color: rgba(0,229,255,.75);
@@ -192,7 +195,6 @@ input:focus, select:focus{
   cursor:pointer;
   font-weight:900;
   color:#ecf0f5;
-  /* background: linear-gradient(135deg, var(--accent), var(--accent2)); */
   background-color: rgb(42, 42, 88);
   box-shadow: 0 16px 34px rgba(0,229,255,.22);
   display:flex;
@@ -279,6 +281,9 @@ input:focus, select:focus{
   grid-template-columns: 260px 1fr;
   min-height:100vh;
 }
+@media (max-width: 980px){
+  .layout{grid-template-columns: 1fr}
+}
 
 /* Sidebar */
 .sidebar{
@@ -307,9 +312,7 @@ input:focus, select:focus{
   padding:0 12px;
   transition:.18s;
 }
-.navBtn:hover{
-  background: rgba(255,255,255,.07);
-}
+.navBtn:hover{background: rgba(255,255,255,.07);}
 .navBtn.active{
   background: linear-gradient(135deg, rgba(0,229,255,.22), rgba(124,58,237,.14));
   border-color: rgba(0,229,255,.30);
@@ -321,12 +324,8 @@ input:focus, select:focus{
 .tiny{font-size:12px}
 .tiny.muted{color:rgba(241,251,255,.60)}
 
-@media (max-width: 980px){
-  .layout{grid-template-columns: 1fr}
-}
-
 /* Main + top bar */
-.main{padding:16px}
+.main{padding:16px; min-width:0;} /* ✅ important */
 .dashTop{
   display:flex;
   justify-content:space-between;
@@ -336,7 +335,7 @@ input:focus, select:focus{
   border-radius: 12px;
   background:rgb(12, 51, 75);
   border:1px solid rgba(6,26,45,.18);
-  color: whitesmoke  !important;
+  color: whitesmoke !important;
 }
 .dashTitle h1{margin:0; font-size:22px; font-weight:900}
 .dashTitle p{margin:6px 0 0; color:rgba(31, 6, 14, 0.62)}
@@ -392,7 +391,7 @@ input:focus, select:focus{
 .menuItem:hover{background: rgba(0,229,255,.12)}
 
 /* Content */
-.content{margin-top:14px}
+.content{margin-top:14px; min-width:0;} /* ✅ important */
 .panel{display:none}
 .panel.show{display:block}
 
@@ -416,6 +415,7 @@ input:focus, select:focus{
   display:grid;
   grid-template-columns: 1fr 1fr;
   gap:14px;
+  min-width:0;
 }
 @media (max-width: 980px){
   .grid2{grid-template-columns:1fr}
@@ -428,11 +428,12 @@ input:focus, select:focus{
   box-shadow: var(--shadow);
   padding:14px;
   animation: rise .35s ease-out both;
+  min-width:0; /* ✅ important */
 }
 .cardHead{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px}
 .cardHead h3{margin:0; font-size:15px; font-weight:900}
 
-.row2{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
+.row2{display:grid; grid-template-columns: 1fr 1fr; gap:10px; min-width:0;}
 @media (max-width: 560px){ .row2{grid-template-columns:1fr} }
 
 .radioRow{display:grid; grid-template-columns: 1fr 1fr; gap:10px}
@@ -471,39 +472,64 @@ input:focus, select:focus{
   padding:12px;
 }
 
-/* ✅ TABLES (BOLD borders) */
+/* =========================
+   ✅ TABLES (FINAL)
+   - Page never scrolls horizontally
+   - Only tableWrap scrolls horizontally
+========================= */
 .tableWrap{
-  overflow:auto;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
   border-radius: 12px;
   border:2px solid rgba(6,26,45,.28);
   background:#fff;
 }
+
+/* ✅ Make table content-width so it scrolls inside wrapper */
 .tbl{
-  width:100%;
+  width: max-content !important;
+  min-width: 100% !important;     /* fills container first */
   border-collapse: collapse;
-  min-width: 520px;
+  table-layout: auto;
 }
+
+/* ✅ Keep columns on one line so horizontal scroll works */
 .tbl th, .tbl td{
   padding:10px 10px;
   border-bottom:2px solid rgba(6,26,45,.16);
   font-size:13px;
+  white-space: nowrap;
+  vertical-align: middle;
 }
+
 .tbl td{
   border-right:2px solid rgba(6,26,45,.10);
 }
-.tbl tr td:last-child{
-  border-right:none;
-}
+.tbl tr td:last-child{border-right:none;}
+
 .tbl th{
   text-align:left;
   font-size:12px;
   color:rgba(6,19,31,.84);
   background: rgba(0,229,255,.10);
   border-bottom:2px solid rgba(6,26,45,.22);
+
   position: sticky;
   top:0;
+  z-index: 2;
 }
 .tbl tr:hover td{background: rgba(0,229,255,.08)}
+
+/* ✅ Small mobile: tighter cells */
+@media (max-width: 520px){
+  .tbl th, .tbl td{
+    padding: 8px 8px;
+    font-size: 11px;
+  }
+}
 
 /* KPIs */
 .kpiRow{
@@ -541,6 +567,9 @@ input:focus, select:focus{
 }
 @media (max-width: 980px){
   .filters{grid-template-columns:1fr 1fr;}
+}
+@media (max-width: 520px){
+  .filters{grid-template-columns:1fr;}
 }
 
 /* view toggle pills */
@@ -634,7 +663,6 @@ input:focus, select:focus{
   place-items:center;
   padding:24px;
 }
-
 .loginOnlyCard{
   width:min(460px, 92vw);
   background: var(--card);
@@ -644,7 +672,6 @@ input:focus, select:focus{
   padding: 18px 18px 16px;
   animation: rise .55s ease-out both;
 }
-
 .loginBrand{
   display:flex;
   align-items:center;
@@ -652,19 +679,16 @@ input:focus, select:focus{
   padding-bottom:12px;
   border-bottom:1px solid rgba(6,26,45,.14);
 }
-
 .loginTitle{
   font-weight:900;
   font-size:18px;
   letter-spacing:.2px;
 }
-
 .loginSub{
   font-size:12px;
   color: rgba(6,19,31,.62);
   margin-top:2px;
 }
-
 .loginFoot{
   margin-top:14px;
   display:flex;
@@ -674,7 +698,6 @@ input:focus, select:focus{
   padding-top:12px;
   border-top:1px solid rgba(6,26,45,.12);
 }
-
 .loginFoot .dot{
   width:8px;
   height:8px;
@@ -683,25 +706,16 @@ input:focus, select:focus{
   box-shadow: 0 0 18px rgba(0,229,255,.6);
 }
 
-/* =========================================
-   ✅ MOBILE STICKY NAV (Guaranteed)
-   Sidebar becomes top sticky bar on mobile
-========================================= */
-
-
-/* =========================================================
-   ✅ ADDED UPDATED CSS (NO CHANGE ABOVE)
-   Only new classes for Admin Summary + Monthly blocks + filters
-========================================================= */
-
-/* tighter head helper (used in admin summary) */
+/* =========================
+   Extra: Summary layout + filters
+========================= */
 .tightHead{margin-bottom:8px}
 
-/* ✅ Summary layout (vertical tabs on left) */
 .summaryLayout{
   display:grid;
   grid-template-columns: 190px 1fr;
   gap:12px;
+  min-width:0;
 }
 @media (max-width: 980px){
   .summaryLayout{grid-template-columns:1fr}
@@ -737,37 +751,7 @@ input:focus, select:focus{
 .sumTabPanel{display:none}
 .sumTabPanel.show{display:block}
 
-/* ✅ Monthly blocks (3 fiscal years grid) */
-.monthBlocks{
-  display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap:12px;
-}
-@media (max-width: 980px){
-  .monthBlocks{grid-template-columns:1fr}
-}
-.monthBlock{
-  border-radius:12px;
-  border:1.5px solid rgba(6,26,45,.16);
-  background:#fff;
-  box-shadow: var(--shadow);
-  padding:12px;
-}
-.monthBlockHead{
-  display:flex;
-  justify-content:space-between;
-  align-items:flex-start;
-  gap:10px;
-  margin-bottom:10px;
-}
-.mbTitle{font-weight:900}
-.mbSub{margin-top:2px}
-
-/* mini table inside monthly blocks */
-.tblMini{min-width:280px}
-.totRow td{background: rgba(0,229,255,.06)}
-
-/* ✅ filters used for admin Maintenance/Photo (2 columns) */
+/* filters used for admin Maintenance/Photo (2 columns) */
 .filtersMnt, .filtersPho{
   grid-template-columns: 220px 220px;
 }
@@ -778,372 +762,323 @@ input:focus, select:focus{
   .filtersMnt, .filtersPho{grid-template-columns:1fr}
 }
 
-
-/* =========================================================
-   ✅ ADMIN TABLE UI REVAMP (paste at END)
-   - compact width, less height
-   - header font bigger
-   - vertical borders in header too
-   - rows one-line (no wrap)
-========================================================= */
-
-body[data-page="admin"] .card { padding: 12px; }
-
-/* ✅ Make all admin tables smaller width + centered */
-body[data-page="admin"] .tableWrap{
-  max-width: 780px;
-  margin: 0 auto;
-  overflow: hidden !important;     /* rounded container look */
-  border-radius: 14px !important;
-}
-
-/* ✅ Remove forced min-width (your old tbl min-width was big) */
-body[data-page="admin"] .tbl{
-  min-width: 0 !important;
-}
-
-/* ✅ Compact cell height + single line */
-body[data-page="admin"] .tbl th,
-body[data-page="admin"] .tbl td{
-  padding: 8px 10px !important;
-  font-size: 14px !important;
-  white-space: nowrap !important;
-  vertical-align: middle;
-}
-
-/* ✅ Header font bigger + stronger */
-body[data-page="admin"] .tbl th{
-  font-size: 17.5px !important;     /* ✅ header bigger */
-  font-weight: 900 !important;
-  letter-spacing: .2px;
-  background: rgba(0,229,255,.10) !important;
-}
-
-/* ✅ Vertical borders: header + body (so clear which col is which) */
-body[data-page="admin"] .tbl th,
-body[data-page="admin"] .tbl td{
-  border-right: 2px solid rgba(6,26,45,.12) !important;
-}
-body[data-page="admin"] .tbl th:last-child,
-body[data-page="admin"] .tbl td:last-child{
-  border-right: none !important;
-}
-
-/* ✅ Row separators a bit cleaner */
-body[data-page="admin"] .tbl th,
-body[data-page="admin"] .tbl td{
-  border-bottom: 2px solid rgba(6,26,45,.10) !important;
-}
-
-/* ✅ Remove extra big spacing around summary tables */
-body[data-page="admin"] .cardHead{ margin-bottom: 8px; }
-body[data-page="admin"] .panelHead{ padding-bottom: 10px; }
-
-/* ✅ Keep summary tables not too wide */
-body[data-page="admin"] #sec-agen #adminSummaryWrap .tableWrap{
-  max-width: 860px;
-}
-body[data-page="admin"] #sec-agen #adminMonthlyWrap .tableWrap{
-  max-width: 920px;
-}
-body[data-page="admin"] #sec-agen #adminYearlyWrap .tableWrap{
-  max-width: 720px;
-}
-body[data-page="admin"] #sec-agen #adminLast10Wrap .tableWrap{
-  max-width: 720px;
-}
-
-
-
-
-
-/* =========================================================
-   ✅ USER TABLE SCROLL FIX (only user page)
-   - prevents column cut
-   - always allows horizontal scroll when needed
-========================================================= */
-body[data-page="user"] .tableWrap{
-  max-width: 100% !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* ✅ make table "content-width" so it can overflow & scroll */
-body[data-page="user"] .tableWrap .tbl{
-  width: max-content !important;   /* key */
-  min-width: 520px !important;     /* keeps a base width */
-}
-
-/* ✅ optional: make scrollbar visible in webkit */
-body[data-page="user"] .tableWrap::-webkit-scrollbar{
-  height: 8px;
-}
-body[data-page="user"] .tableWrap::-webkit-scrollbar-thumb{
-  background: rgba(6,26,45,.25);
-  border-radius: 999px;
-}
-
-
-
-/* =========================================================
-   ✅ TABLE RESPONSIVE FIX (GLOBAL + VARIANTS)
-   - No forced same width for all
-   - 2-col tables can be compact
-   - no header/col cut on mobile
-========================================================= */
-
-/* ✅ Default: tableWrap should allow horizontal scroll when needed */
-.tableWrap{
-  overflow-x: auto !important;
-  overflow-y: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* ✅ Remove global forced min-width (THIS is main reason for cut) */
-.tbl{
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 0 !important;          /* ✅ was 520px */
-  table-layout: auto;               /* ✅ flexible */
-}
-
-/* ✅ By default, allow wrapping so headers don't cut */
-.tbl th, .tbl td{
-  white-space: normal;              /* ✅ was nowrap in admin override */
-  word-break: break-word;
-}
-
-/* ✅ VARIANTS: use per table */
-
-/* 1) Compact tables (2 columns like Month | Total Units) */
-.tableWrap--fit{
-  display: inline-block;            /* ✅ will shrink to content */
-  max-width: 100%;
-}
-.tbl--compact{
-  width: auto !important;           /* ✅ content based width */
-  min-width: 280px;                 /* ✅ minimum small */
-}
-.tbl--compact th, .tbl--compact td{
-  padding: 8px 10px;
-}
-
-/* 2) Medium default tables */
-.tbl--md{ min-width: 520px; }
-
-/* 3) Large tables (maintenance) */
-.tbl--lg{ min-width: 900px; }
-
-/* ✅ Optional: Sticky header works fine with scroll */
-.tbl th{
-  position: sticky;
-  top: 0;
-  z-index: 2;
-}
-
-/* ✅ Mobile: reduce padding + font so nothing cuts */
-@media (max-width: 520px){
-  .tbl th, .tbl td{
-    padding: 8px 8px !important;
-    font-size: 12px !important;
-  }
-}
-
-/* =========================================================
-   ✅ ADMIN OVERRIDE CLEANUP (remove width forcing)
-   - Don’t force max-width for ALL tables
-========================================================= */
-body[data-page="admin"] .tableWrap{
-  max-width: unset !important;       /* ✅ stop forcing same width */
-  margin: 0 !important;              /* ✅ allow natural */
-  /* overflow-x: auto !important; */
-}
-
-/* ✅ If you want SOME tables centered only, use class tableCenter */
-.tableCenter{
-  max-width: 860px;
-  margin: 0 auto;
-}
-
-
-/* =========================================================
-   ✅ TABLE REVAMP (works for admin + user)
-   Apply by adding class="tableWrap tableRevamp"
-========================================================= */
-
-.tableWrap.tableRevamp{
-  border-radius: 14px !important;
-  border: 2px solid rgba(6,26,45,.18) !important;
-  background:#fff !important;
-
-  /* ✅ IMPORTANT: allow horizontal scroll */
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  -webkit-overflow-scrolling: touch;
-}
-
-/* ✅ table should be able to overflow to scroll */
-.tableWrap.tableRevamp .tbl{
-  width: max-content !important;
-  min-width: 520px !important;
-  border-collapse: collapse !important;
-}
-
-/* ✅ Compact cell height + single line */
-.tableWrap.tableRevamp .tbl th,
-.tableWrap.tableRevamp .tbl td{
-  padding: 8px 10px !important;
-  font-size: 14px !important;
-  white-space: nowrap !important;
-  vertical-align: middle;
-
-  border-right: 2px solid rgba(6,26,45,.12) !important;
-  border-bottom: 2px solid rgba(6,26,45,.10) !important;
-}
-
-.tableWrap.tableRevamp .tbl th:last-child,
-.tableWrap.tableRevamp .tbl td:last-child{
-  border-right:none !important;
-}
-
-/* ✅ Header font bigger + sticky */
-.tableWrap.tableRevamp .tbl th{
-  font-size: 17.5px !important;
-  font-weight: 900 !important;
-  letter-spacing: .2px;
-  background: rgba(0,229,255,.10) !important;
-
-  position: sticky;
-  top: 0;
-  z-index: 2;
-}
-
-/* ✅ hover */
-.tableWrap.tableRevamp .tbl tr:hover td{
-  background: rgba(0,229,255,.08) !important;
-}
-
-
-
+/* Sidebar logo */
 .sideBrand {
   display: flex;
   align-items: center;
   gap: 12px;
 }
-
 .sideLogo {
   width: 50px;
   height: 50px;
   object-fit: contain;
 }
 
+/* =========================
+   ✅ ADMIN Responsive UI (same style)
+========================= */
+body[data-page="admin"] .sidebar .navText{ font-weight:900; }
 
-/* ✅ FIX: Allow table scroll on mobile (Admin Maintenance table) */
-body[data-page="admin"] #sec-amnt .tableWrap{
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;          /* ✅ helps on mobile */
+body[data-page="admin"] .adminTop{
+  padding: 10px 12px !important;
+  border-radius: 12px;
+}
+body[data-page="admin"] .adminTitle{
+  margin:0 !important;
+  font-size: 16px !important;
+  line-height: 1.1;
+  font-weight: 900;
+}
+body[data-page="admin"] .adminSub{
+  margin-top: 2px;
+  font-size: 11px;
+  opacity: .85;
+  font-weight: 700;
+}
+body[data-page="admin"] .adminLogoutBtn{
+  height: 34px !important;
+  padding: 0 10px !important;
+  border-radius: 10px !important;
+  font-size: 12px !important;
 }
 
-/* ✅ make sure table is wider than container so it can scroll */
-body[data-page="admin"] #sec-amnt .tableWrap .tbl{
-  width: max-content !important;
-  min-width: 900px !important;  /* maintenance is big */
+body[data-page="admin"] .panelHead h1{
+  font-size: 16px !important;
+  margin:0 !important;
+}
+body[data-page="admin"] .viewToggle{
+  padding: 4px !important;
+  gap: 6px !important;
+  border-radius: 12px !important;
+}
+body[data-page="admin"] .viewBtn{
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  border-radius: 10px !important;
+}
+
+body[data-page="admin"] .summaryTabs{
+  gap: 8px !important;
+  padding: 8px !important;
+}
+body[data-page="admin"] .sumTabBtn{
+  height: 36px !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+  border-radius: 10px !important;
+}
+
+body[data-page="admin"] #last10FromAdmin,
+body[data-page="admin"] #last10ToAdmin{
+  height: 34px !important;
+  font-size: 12px !important;
+  padding: 0 8px !important;
+  border-radius: 10px !important;
+}
+
+/* =========================
+   ✅ MOBILE MODE (<=980px)
+   Sidebar becomes top row tabs
+========================= */
+@media (max-width: 980px){
+  body[data-page="admin"] .layout{
+    grid-template-columns: 1fr !important;
+  }
+
+  body[data-page="admin"] .sidebar{
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: 10px 10px 8px;
+  }
+
+  body[data-page="admin"] .sideBrand{
+    padding: 10px 10px !important;
+    gap: 10px !important;
+  }
+  body[data-page="admin"] .sideLogo{
+    width: 36px !important;
+    height: 36px !important;
+  }
+  body[data-page="admin"] .sideTitle{ font-size: 14px !important; }
+  body[data-page="admin"] .sideSub{ font-size: 11px !important; }
+
+  body[data-page="admin"] .sideNav{
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    padding: 8px 0 0 !important;
+  }
+  body[data-page="admin"] .navBtn{
+    height: 40px !important;
+    padding: 0 8px !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+  }
+  body[data-page="admin"] .navIcon{ width: auto !important; }
+
+  body[data-page="admin"] .main{ padding: 10px !important; }
+  body[data-page="admin"] .card{ padding: 10px !important; }
+
+  body[data-page="admin"] .summaryLayout{
+    grid-template-columns: 1fr !important;
+  }
+  body[data-page="admin"] .summaryTabs{
+    flex-direction: row !important;
+    justify-content: space-between;
+  }
+  body[data-page="admin"] .sumTabBtn{
+    flex: 1;
+    text-align: center !important;
+  }
+}
+
+@media (max-width: 520px){
+  body[data-page="admin"] .adminTitle{ font-size: 15px !important; }
+  body[data-page="admin"] .adminLogoutBtn{ height: 32px !important; }
+
+  body[data-page="admin"] .panelHead{
+    gap: 8px !important;
+    padding: 6px 0 10px !important;
+  }
 }
 
 
-/* ✅ USER: stop page from becoming wider due to table min-width */
-body[data-page="user"] .tbl,
-body[data-page="user"] .tbl--md,
-body[data-page="user"] .tbl--lg{
-  min-width: 0 !important;
-  width: 100% !important;
-}
-
-/* ✅ USER: if tableRevamp is used, don't force max-content width */
-body[data-page="user"] .tableWrap.tableRevamp .tbl{
-  width: 100% !important;
-  min-width: 0 !important;
+/* =========================
+   ✅ MOBILE: remove desktop top header completely
+========================= */
+@media (max-width: 980px){
+  body[data-page="admin"] .dashTop.adminTop{
+    display: none !important;
+  }
 }
 
 
-/* ✅ USER MAINTENANCE: horizontal scroll instead of wrapping */
-body[data-page="user"] .mntTableWrap{
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  -webkit-overflow-scrolling: touch;
+/* =========================
+   ✅ Mobile header row: logo left, logout right
+========================= */
+body[data-page="admin"] .sideBrand{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-/* keep table in one line */
-body[data-page="user"] .mntTableWrap table{
-  white-space: nowrap !important;
-  min-width: 720px !important;
+body[data-page="admin"] .sideBrandLeft{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* mobile specific sizing */
+@media (max-width: 980px){
+  body[data-page="admin"] .sideBrand{
+    padding: 10px 10px !important;
+  }
+
+  body[data-page="admin"] .adminLogoutBtn{
+    height: 32px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+    border-radius: 10px !important;
+    white-space: nowrap;
+  }
 }
 
 
-/* ✅ USER MAINTENANCE: horizontal scroll (final) */
-body[data-page="user"] #sec-mnt .tableWrap{
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
+/* ✅ Default (WEB): show top header logout, hide sidebar logout */
+@media (min-width: 981px){
+  body[data-page="admin"] #adminLogout{ display: none !important; }       /* sidebar one */
+  body[data-page="admin"] #adminLogoutTop{ display: inline-flex !important; } /* header one */
 }
 
-body[data-page="user"] #sec-mnt .tableWrap .tbl{
-  width: max-content !important;
-  min-width: 720px !important;   /* need ho to 800/900 kar dena */
-}
+/* ✅ Mobile: show sidebar logout in logo row, hide top header */
+@media (max-width: 980px){
+  body[data-page="admin"] #adminLogout{ display: inline-flex !important; }
+  body[data-page="admin"] #adminLogoutTop{ display: none !important; }
 
-body[data-page="user"] #userMntTable th,
-body[data-page="user"] #userMntTable td{
-  white-space: nowrap !important;
+  body[data-page="admin"] .sideBrand{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+
+  body[data-page="admin"] .sideBrandLeft{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  body[data-page="admin"] .adminLogoutBtn{
+    height: 32px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+    border-radius: 10px !important;
+    white-space: nowrap;
+  }
+}
+/* ✅ Admin Maintenance Filters: keep From/To side-by-side on mobile */
+@media (max-width: 600px) {
+  .filters.filtersMnt{
+    display: flex;
+    flex-direction: row;      /* ✅ side by side */
+    gap: 10px;                /* less gap */
+    align-items: flex-end;
+  }
+
+  .filters.filtersMnt .field{
+    flex: 1;                  /* equal width */
+    min-width: 0;             /* prevents wrapping */
+    margin: 0;                /* remove extra vertical spacing */
+  }
+
+  .filters.filtersMnt label{
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .filters.filtersMnt input[type="date"]{
+    width: 100%;
+    height: 34px;             /* smaller */
+    padding: 6px 8px;         /* smaller */
+    font-size: 12px;
+  }
 }
 
 
 /* =========================================================
-   ✅ FINAL: USER > MAINTENANCE ONLY
-   - Form fields responsive (no overflow)
-   - Table horizontal scroll (no wrap)
+   ✅ Admin Photos Filters: From + To side-by-side on mobile
 ========================================================= */
+@media (max-width: 600px) {
+  .filters.filtersPho{
+    display: flex;
+    flex-direction: row;      /* side by side */
+    gap: 10px;
+    align-items: flex-end;
+  }
 
-/* 1) Maintenance FORM: make inputs/selects shrink properly on small screens */
-body[data-page="user"] #sec-mnt .grid2,
-body[data-page="user"] #sec-mnt .card,
-body[data-page="user"] #sec-mnt .row2,
-body[data-page="user"] #sec-mnt .field{
-  min-width: 0 !important;
-}
+  .filters.filtersPho .field{
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+  }
 
-body[data-page="user"] #sec-mnt input,
-body[data-page="user"] #sec-mnt select{
-  width: 100% !important;
-  max-width: 100% !important;
-}
+  .filters.filtersPho label{
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
 
-/* On very small screens: force 1 column */
-@media (max-width: 560px){
-  body[data-page="user"] #sec-mnt .row2{
-    grid-template-columns: 1fr !important;
+  .filters.filtersPho input[type="date"]{
+    width: 100%;
+    height: 34px;
+    padding: 6px 8px;
+    font-size: 12px;
   }
 }
 
-/* 2) Maintenance TABLE: horizontal scroll */
-body[data-page="user"] #sec-mnt .tableWrap{
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  -webkit-overflow-scrolling: touch !important;
-  touch-action: pan-x;
+/* extra-tight phones */
+@media (max-width: 420px) {
+  .filters.filtersPho{ gap: 6px; }
+  .filters.filtersPho label{ font-size: 11px; }
+  .filters.filtersPho input[type="date"]{
+    height: 32px;
+    font-size: 11px;
+    padding: 5px 6px;
+  }
+}
+/* =========================================================
+   ✅ Admin "Last 15 Days" date range: keep side-by-side on mobile
+   Targets: #last10FromAdmin + #last10ToAdmin
+========================================================= */
+@media (max-width: 600px) {
+  /* parent wrapper (the inline-styled div) */
+  input#last10FromAdmin,
+  input#last10ToAdmin{
+    width: 100%;
+    height: 34px;
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  /* force the two date blocks to stay in one row */
+  input#last10FromAdmin,
+  input#last10ToAdmin{
+    min-width: 0;
+  }
+
+  /* the row that contains both blocks */
+  #last10FromAdmin,
+  #last10ToAdmin{
+    flex: 1;
+  }
+
+  /* the immediate parent "From/To block" */
+  #last10FromAdmin.parentNode,
+  #last10ToAdmin.parentNode{
+    flex: 1;
+    min-width: 0;
+  }
 }
 
-/* keep table wide + no wrapping, so it scrolls nicely */
-body[data-page="user"] #sec-mnt #userMntTable{
-  width: max-content !important;
-  min-width: 760px !important;  /* if still tight: 900px */
-}
 
-body[data-page="user"] #sec-mnt #userMntTable th,
-body[data-page="user"] #sec-mnt #userMntTable td{
-  white-space: nowrap !important;
-}
