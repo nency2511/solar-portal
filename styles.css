@@ -1082,5 +1082,18 @@ body[data-page="admin"] .sideBrandLeft{
   }
 }
 
+/* ✅ Hide "To" date in Last 15 Days (Admin only) */
+body[data-page="admin"] #last10ToAdmin {
+  display: none !important;
+}
+
+/* Hide the "To" label text also */
+body[data-page="admin"] #last10ToAdmin
+  + span,
+body[data-page="admin"] #last10ToAdmin
+  ~ span {
+  display: none !important;
+}
+
 
 
