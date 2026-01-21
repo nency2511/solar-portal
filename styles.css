@@ -1097,3 +1097,68 @@ body[data-page="admin"] #last10ToAdmin
 
 
 
+
+/* SIDEBAR logout (mobile header row) */
+body[data-page="admin"] #adminLogout{
+  height: 32px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+
+  background: white;
+  border: 1px solid rgba(255,255,255,.22) !important;
+  color: #060606 !important;
+
+  box-shadow: none !important;
+  transform: none !important;
+  line-height: 32px !important;
+  font-weight: 800 !important;
+}
+
+
+
+/* TOP header logout (desktop) - keep it clean */
+body[data-page="admin"] #adminLogoutTop{
+  height: 34px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  font-weight: 800 !important;
+}
+
+/* Optional: ensure sideBrand row aligns nicely */
+body[data-page="admin"] .sideBrand{
+  align-items: center !important;
+}
+
+
+/* =========================
+   ✅ DESKTOP: Top header Logout fix
+   (white pill ko dark premium pill bana do)
+========================= */
+
+body[data-page="admin"] .dashTop.adminTop{
+  align-items: center !important;
+}
+
+body[data-page="admin"] .topActions.adminTopRight{
+  align-items: center !important;
+}
+
+/* Desktop header logout button */
+@media (min-width: 981px){
+  body[data-page="admin"] #adminLogoutTop{
+    height: 34px !important;
+    padding: 5px 14px !important;
+    border-radius: 999px !important;
+
+    background: white;
+    border: 1px solid rgba(255,255,255,.28) !important;
+    color: black!important;
+
+    box-shadow: none !important;
+    transform: none !important;
+    font-weight: 800 !important;
+  }
+
+ 
+}
+
