@@ -478,11 +478,12 @@ input:focus, select:focus{
    - Only tableWrap scrolls horizontally
 ========================= */
 .tableWrap{
-  max-width: 100% !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
+ max-width: 100% !important;
+  overflow-x: auto !important;   /* horizontal table scroll */
+  overflow-y: visible !important;/* ✅ allow vertical page scroll */
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
+  touch-action: pan-x pan-y;  
+     /* ✅ allow both directions */
   border-radius: 12px;
   border:2px solid rgba(6,26,45,.28);
   background:#fff;
@@ -1080,5 +1081,6 @@ body[data-page="admin"] .sideBrandLeft{
     min-width: 0;
   }
 }
+
 
 
