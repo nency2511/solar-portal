@@ -853,16 +853,7 @@ body[data-page="admin"] #sec-agen #adminLast10Wrap .tableWrap{
   max-width: 720px;
 }
 
-/* ✅ Mobile: full width */
-@media (max-width: 980px){
-  body[data-page="admin"] .tableWrap{
-    max-width: 100%;
-  }
-  body[data-page="admin"] .tbl th,
-  body[data-page="admin"] .tbl td{
-    padding: 8px 9px !important;
-  }
-}
+
 
 
 
@@ -1156,4 +1147,3 @@ body[data-page="user"] #sec-mnt #userMntTable th,
 body[data-page="user"] #sec-mnt #userMntTable td{
   white-space: nowrap !important;
 }
-
