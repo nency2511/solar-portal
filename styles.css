@@ -1171,7 +1171,7 @@ body[data-page="admin"] .topActions.adminTopRight{
 ========================================================= */
 body[data-page="user"] .userLogoutBtn{
   height: 34px !important;
-  padding: 0 12px !important;
+  padding: 5px 12px !important;
   border-radius: 999px !important;
   font-size: 12px !important;
   font-weight: 800 !important;
@@ -1341,3 +1341,4 @@ body[data-page="user"] .userLogoutBtn{
     gap: 8px !important;
   }
 }
+
