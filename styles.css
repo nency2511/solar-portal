@@ -478,16 +478,18 @@ input:focus, select:focus{
    - Only tableWrap scrolls horizontally
 ========================= */
 .tableWrap{
- max-width: 100% !important;
+max-width: 100% !important;
   overflow-x: auto !important;   /* horizontal table scroll */
   overflow-y: visible !important;/* ✅ allow vertical page scroll */
   -webkit-overflow-scrolling: touch;
-  touch-action: pan-x pan-y;  
-     /* ✅ allow both directions */
+  touch-action: pan-x pan-y; 
   border-radius: 12px;
   border:2px solid rgba(6,26,45,.28);
   background:#fff;
 }
+
+ 
+   
 
 /* ✅ Make table content-width so it scrolls inside wrapper */
 .tbl{
@@ -1082,6 +1084,7 @@ body[data-page="admin"] .sideBrandLeft{
   }
 }
 
+
 /* ✅ Hide "To" date in Last 15 Days (Admin only) */
 body[data-page="admin"] #last10ToAdmin {
   display: none !important;
@@ -1094,9 +1097,11 @@ body[data-page="admin"] #last10ToAdmin
   ~ span {
   display: none !important;
 }
-
-
-
+/* =========================================================
+   ✅ Fix: Logout button design (Admin)
+   - Mobile sidebar header row button should look dark / premium
+   - Desktop top header logout remains normal
+========================================================= */
 
 /* SIDEBAR logout (mobile header row) */
 body[data-page="admin"] #adminLogout{
@@ -1161,4 +1166,103 @@ body[data-page="admin"] .topActions.adminTopRight{
 
  
 }
+/* =========================================================
+   ✅ USER Responsive UI (same style as Admin)
+========================================================= */
+body[data-page="user"] .userLogoutBtn{
+  height: 34px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  font-size: 12px !important;
+  font-weight: 800 !important;
+}
 
+/* ✅ Default (WEB): show top header logout, hide sidebar logout */
+@media (min-width: 981px){
+  body[data-page="user"] #userLogout{ display: none !important; }       
+  body[data-page="user"] #userLogoutTop{ display: inline-flex !important; } 
+}
+
+/* ✅ Mobile: show sidebar logout, hide top header logout */
+@media (max-width: 980px){
+  body[data-page="user"] #userLogout{ display: inline-flex !important; }
+  body[data-page="user"] #userLogoutTop{ display: none !important; }
+
+  /* Sidebar becomes top row */
+  body[data-page="user"] .layout{
+    grid-template-columns: 1fr !important;
+  }
+
+  body[data-page="user"] .sidebar{
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: 10px 10px 8px;
+  }
+
+  body[data-page="user"] .sideBrand{
+    padding: 10px 10px !important;
+    gap: 10px !important;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+
+  body[data-page="user"] .sideBrandLeft{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  body[data-page="user"] .sideLogo{
+    width: 36px !important;
+    height: 36px !important;
+  }
+
+  body[data-page="user"] .sideTitle{ font-size: 14px !important; }
+  body[data-page="user"] .sideSub{ font-size: 11px !important; }
+
+  /* nav becomes 3 tabs row */
+  body[data-page="user"] .sideNav{
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    padding: 8px 0 0 !important;
+  }
+
+  body[data-page="user"] .navBtn{
+    height: 40px !important;
+    padding: 0 8px !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+  }
+
+  body[data-page="user"] .navIcon{ width: auto !important; }
+
+  /* content spacing */
+  body[data-page="user"] .main{ padding: 10px !important; }
+  body[data-page="user"] .card{ padding: 10px !important; }
+
+  /* ✅ Hide big profile dropdown in mobile to avoid crowd */
+  body[data-page="user"] .profileWrap{
+    display: none !important;
+  }
+}
+
+/* extra-tight phones */
+@media (max-width: 520px){
+  body[data-page="user"] .dashTitle h1{ font-size: 16px !important; }
+  body[data-page="user"] .userLogoutBtn{ height: 32px !important; }
+}
+/* ===============================
+   USER – HIDE TOP LOGOUT (WEB)
+================================ */
+
+/* Desktop / Web */
+@media (min-width: 981px){
+  body[data-page="user"] .topActions > .userLogoutBtn{
+    display: none !important;
+  }
+}
