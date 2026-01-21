@@ -8,6 +8,201 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
+<style>
+/* =========================
+   ✅ ADMIN RESPONSIVE OVERRIDES (ONLY ADMIN PAGE)
+   Paste in admin.html AFTER styles.css
+========================= */
+
+body[data-page="admin"] .sidebar .navText{ font-weight:900; }
+
+/* top header compact */
+body[data-page="admin"] .adminTop{
+  padding: 10px 12px !important;
+  border-radius: 12px;
+}
+body[data-page="admin"] .adminTitle{
+  margin:0 !important;
+  font-size: 16px !important;
+  line-height: 1.1;
+  font-weight: 900;
+}
+body[data-page="admin"] .adminSub{
+  margin-top: 2px;
+  font-size: 11px;
+  opacity: .85;
+  font-weight: 700;
+}
+body[data-page="admin"] .adminLogoutBtn{
+  height: 34px !important;
+  padding: 0 10px !important;
+  border-radius: 10px !important;
+  font-size: 12px !important;
+}
+
+/* panel headings + toggle buttons smaller */
+body[data-page="admin"] .panelHead h1{
+  font-size: 16px !important;
+  margin:0 !important;
+}
+body[data-page="admin"] .viewToggle{
+  padding: 4px !important;
+  gap: 6px !important;
+  border-radius: 12px !important;
+}
+body[data-page="admin"] .viewBtn{
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  border-radius: 10px !important;
+}
+
+/* make Monthly/Yearly tabs small */
+body[data-page="admin"] .summaryTabs{
+  gap: 8px !important;
+  padding: 8px !important;
+}
+body[data-page="admin"] .sumTabBtn{
+  height: 36px !important;
+  padding: 0 10px !important;
+  font-size: 12px !important;
+  border-radius: 10px !important;
+}
+
+/* Last 15 days date filter compact */
+body[data-page="admin"] #last10FromAdmin,
+body[data-page="admin"] #last10ToAdmin{
+  height: 34px !important;
+  font-size: 12px !important;
+  padding: 0 8px !important;
+  border-radius: 10px !important;
+}
+
+/* ✅ TABLE: always allow horizontal scroll on admin */
+body[data-page="admin"] .tableWrap{
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+}
+
+/* table should be content-width so it scrolls */
+body[data-page="admin"] .tableWrap .tbl{
+  width: max-content !important;
+  min-width: 560px !important;      /* base */
+  table-layout: auto !important;
+}
+
+/* headers/cells: compact + no cut */
+body[data-page="admin"] .tbl th,
+body[data-page="admin"] .tbl td{
+  white-space: nowrap !important;
+  padding: 8px 8px !important;
+  font-size: 12px !important;
+}
+
+/* keep header sticky */
+body[data-page="admin"] .tbl th{
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+/* ✅ BIG tables: maintenance needs more width */
+body[data-page="admin"] #sec-amnt .tableWrap .tbl{
+  min-width: 1100px !important;
+}
+
+/* ✅ Photos grid responsive (already ok, just tighten) */
+body[data-page="admin"] .photoGrid{
+  gap: 10px !important;
+}
+
+/* =========================
+   ✅ MOBILE MODE (<=980px)
+   Sidebar becomes top row tabs
+========================= */
+@media (max-width: 980px){
+  body[data-page="admin"] .layout{
+    grid-template-columns: 1fr !important;
+  }
+
+  /* sidebar becomes sticky top */
+  body[data-page="admin"] .sidebar{
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    padding: 10px 10px 8px;
+  }
+
+  /* brand smaller */
+  body[data-page="admin"] .sideBrand{
+    padding: 10px 10px !important;
+    gap: 10px !important;
+  }
+  body[data-page="admin"] .sideLogo{
+    width: 36px !important;
+    height: 36px !important;
+  }
+  body[data-page="admin"] .sideTitle{ font-size: 14px !important; }
+  body[data-page="admin"] .sideSub{ font-size: 11px !important; }
+
+  /* nav buttons in one row */
+  body[data-page="admin"] .sideNav{
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    padding: 8px 0 0 !important;
+  }
+  body[data-page="admin"] .navBtn{
+    height: 40px !important;
+    padding: 0 8px !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
+  }
+  body[data-page="admin"] .navIcon{ width: auto !important; }
+
+  /* main padding tighter */
+  body[data-page="admin"] .main{ padding: 10px !important; }
+
+  /* card padding tighter */
+  body[data-page="admin"] .card{ padding: 10px !important; }
+
+  /* Summary layout becomes single column */
+  body[data-page="admin"] .summaryLayout{
+    grid-template-columns: 1fr !important;
+  }
+  body[data-page="admin"] .summaryTabs{
+    flex-direction: row !important;
+    justify-content: space-between;
+  }
+  body[data-page="admin"] .sumTabBtn{
+    flex: 1;
+    text-align: center !important;
+  }
+}
+
+/* =========================
+   ✅ SMALL MOBILE (<=520px)
+========================= */
+@media (max-width: 520px){
+  body[data-page="admin"] .adminTitle{ font-size: 15px !important; }
+  body[data-page="admin"] .adminLogoutBtn{ height: 32px !important; }
+
+  body[data-page="admin"] .panelHead{
+    gap: 8px !important;
+    padding: 6px 0 10px !important;
+  }
+
+  /* tables even tighter */
+  body[data-page="admin"] .tbl th,
+  body[data-page="admin"] .tbl td{
+    font-size: 11px !important;
+    padding: 7px 7px !important;
+  }
+}
+</style>
 
 <body data-page="admin">
   <div class="bg-orb orb1"></div>
@@ -27,38 +222,39 @@
 
 
       <nav class="sideNav">
-        <button class="navBtn active" data-section="agen">
-          <span class="navIcon">📊</span>
-          <span>Generation Data</span>
-        </button>
-        <button class="navBtn" data-section="amnt">
-          <span class="navIcon">🧾</span>
-          <span>Maintenance Data</span>
-        </button>
-        <button class="navBtn" data-section="apho">
-          <span class="navIcon">🖼️</span>
-          <span>Photographs</span>
-        </button>
+       <button class="navBtn active" data-section="agen">
+  <span class="navIcon">📊</span>
+  <span class="navText">Gen</span>
+</button>
+
+<button class="navBtn" data-section="amnt">
+  <span class="navIcon">🧾</span>
+  <span class="navText">Mnt</span>
+</button>
+
+<button class="navBtn" data-section="apho">
+  <span class="navIcon">🖼️</span>
+  <span class="navText">Photos</span>
+</button>
+
       </nav>
 
-      <div class="sideFooter">
-        <div class="tiny">Admin access</div>
-        <div class="tiny muted">View all logs</div>
-      </div>
+      
     </aside>
 
     <!-- MAIN -->
     <main class="main">
-      <header class="dashTop">
-        <div class="dashTitle">
-          <h1>Admin Dashboard</h1>
-          <!-- <p style="color: white;">View entries user-wise, plant-wise, date-wise.</p> -->
-        </div>
+     <header class="dashTop adminTop">
+  <div class="dashTitle adminTopLeft">
+    <h1 class="adminTitle">Admin</h1>
+    <div class="adminSub">Gen Summary</div>
+  </div>
 
-        <div class="topActions">
-          <button class="btnGhost" id="adminLogout">Logout</button>
-        <!-- </div>Auto date filter + pagination. -->
-      </header>
+  <div class="topActions adminTopRight">
+    <button class="btnGhost adminLogoutBtn" id="adminLogout">Logout</button>
+  </div>
+</header>
+
 
       <section class="content">
 
@@ -354,5 +550,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="app.js"></script>
+
+  
 </body>
 </html>
