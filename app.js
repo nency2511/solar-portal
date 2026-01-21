@@ -1839,3 +1839,17 @@ async function fetchUserPhotosFromSheet(userId) {
 }
 
 
+// ✅ USER logout buttons (ONE consistent logout)
+function doUserLogout() {
+  try {
+    clearSession(); // removes sp_session
+    localStorage.removeItem("sp_current_user"); // optional but good
+  } catch (e) {}
+
+  window.location.href = "index.html";
+}
+
+["userLogout", "userLogoutTop", "logoutBtn"].forEach((id) => {
+  const btn = document.getElementById(id);
+  if (btn) btn.addEventListener("click", doUserLogout);
+});
