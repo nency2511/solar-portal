@@ -17,36 +17,39 @@
   <div class="layout">
     <!-- SIDEBAR -->
     <aside class="sidebar">
-     <div class="sideBrand">
-  <img src="https://www.friendssteel.com/wp-content/uploads/2020/04/logo.png" alt="Solar Logo" class="sideLogo" />
-  <div>
-    <div class="sideTitle">Solar Portal</div>
-    <div class="sideSub">User Panel</div>
+    <div class="sideBrand">
+  <div class="sideBrandLeft">
+    <img src="https://www.friendssteel.com/wp-content/uploads/2020/04/logo.png" class="sideLogo" />
+    <div>
+      <div class="sideTitle">Solar Portal</div>
+      <div class="sideSub">User Panel</div>
+    </div>
   </div>
+
+  <!-- ✅ Logout (mobile header row) -->
+  <button class="btnGhost userLogoutBtn" id="userLogout" type="button">Logout</button>
 </div>
 
 
       <nav class="sideNav">
         <button class="navBtn active" data-section="gen">
           <span class="navIcon">⚡</span>
-          <span>Generation Units Data</span>
+          <span>Generation</span>
         </button>
         <button class="navBtn" data-section="mnt">
           <span class="navIcon">🧰</span>
-          <span>Maintenance Data</span>
+          <span>Maintenance</span>
         </button>
         <button class="navBtn" data-section="pho">
           <span class="navIcon">📸</span>
-          <span>Photographs</span>
+          <span>Photos</span>
         </button>
+
+        
       </nav>
 
 
-
-      
-      <div class="sideFooter">
-        <div class="tiny">© Solar Portal</div>
-      </div>
+ 
     </aside>
 
     <!-- MAIN -->
@@ -58,6 +61,8 @@
         </div>
 
         <div class="topActions">
+       
+
           <div class="profileWrap">
             <button class="profileBtn" id="profileBtn" type="button">
               <span class="avatar" id="avatarLetter">U</span>
@@ -82,7 +87,7 @@
         <div class="panel show" id="sec-gen">
           <div class="panelHead">
             <div>
-              <h1>Daily Generation Data Entry</h1>
+              <h4>Daily Generation Data Entry</h4>
               <!-- <p>Date auto-captured. Enter units for Ashiana/Darpan.</p> -->
             </div>
             <!-- <div class="pill">Auto Date 📅</div> -->
@@ -93,7 +98,7 @@
               <form id="genForm" class="form">
                 <div class="field">
                   <label>Date (YYYY-MM-DD)</label>
-                  <input id="genDate" type="date" readonly />
+                  <input id="genDate" type="date"  />
                 </div>
 
                 <div class="row2">
@@ -165,7 +170,7 @@
         <div class="panel" id="sec-mnt">
           <div class="panelHead">
             <div>
-              <h1>Maintenance Checklist</h1>
+              <h4>Maintenance Checklist</h4>
               <!-- <p>Capture staff presence, cleaning hours, breakdown details.</p> -->
             </div>
             <!-- <div class="pill">Quick Log 🧾</div> -->
@@ -309,7 +314,7 @@
         <div class="panel" id="sec-pho">
           <div class="panelHead">
             <div>
-              <h1>Photographs Upload</h1>
+              <h4>Photographs Upload</h4>
               <!-- <p>Upload Daily/Weekly/Monthly plant photographs with date.</p> -->
             </div>
             <!-- <div class="pill">Image Log 📌</div> -->
@@ -422,5 +427,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script src="app.js"></script>
+
+  
 </body>
 </html>
