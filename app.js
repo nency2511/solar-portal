@@ -958,10 +958,16 @@ function initAdminPage() {
   seedIfNeeded();
   if (!requireRole("admin")) return;
 
-  $("#adminLogout")?.addEventListener("click", () => {
+ function bindAdminLogout() {
+  const doLogout = () => {
     clearSession();
     window.location.href = "index.html";
-  });
+  };
+
+  $("#adminLogout")?.addEventListener("click", doLogout);      // sidebar (mobile)
+  $("#adminLogoutTop")?.addEventListener("click", doLogout);   // top header (web)
+}
+  bindAdminLogout();
 
   $all(".navBtn").forEach(btn => {
     btn.addEventListener("click", () => {
@@ -1831,3 +1837,5 @@ async function fetchUserPhotosFromSheet(userId) {
   out.sort((a, b) => (b.ts || 0) - (a.ts || 0));
   return out;
 }
+
+
