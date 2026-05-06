@@ -28,9 +28,10 @@ const MNT_API_URL =
   "https://script.google.com/macros/s/AKfycbx1gXmBGZZanCvVMsrEI5KAYn6sdscMwjz4i44O8A6Qf5O5NvmJxk6nHUA5-VEWspQGNQ/exec";
  // <-- paste maintenance sheet API here (optional)
 
-const PHOTO_WEBHOOK_URL = "https://fsgdme.app.n8n.cloud/webhook/83c53409-1837-4ae3-8952-c2f1a036f8fd";
-const PHOTO_API_URL =
-  "https://script.google.com/macros/s/AKfycbyb7BW0xLN2siAcbm7E0IiHe1dc02km0QZ3FgQWzsLmEzeAc6ce0LkaODPYafajmEAN/exec";
+// ✅ Apps Script Web App — handles BOTH photo upload (POST) AND photo fetch (GET)
+//    Runs as user (no service account quota issues), writes to user-owned Drive folder + dummy Sheet
+const PHOTO_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwNS0faNkVlcgZGoHO8HFDioZfdmTOjoTnJ_JzXnbT9UCPufY9mtWb4iyY8fwV2izpzig/exec";
+const PHOTO_API_URL = "https://script.google.com/macros/s/AKfycbwNS0faNkVlcgZGoHO8HFDioZfdmTOjoTnJ_JzXnbT9UCPufY9mtWb4iyY8fwV2izpzig/exec";
 
  
 const LS_KEYS = {
@@ -633,23 +634,31 @@ function initUserPage() {
   if (!files.length) return toastErr("No file", "Please choose image(s).");
 
   try {
-    const fd = new FormData();
+    // ✅ Apps Script JSON+base64 format (multipart binary nahi support karta acche se)
+    const photosBase64 = await Promise.all(files.map(async (f) => {
+      const dataUrl = await toBase64(f);
+      const base64 = String(dataUrl).split(",")[1] || "";
+      return {
+        name: f.name,
+        type: f.type || "application/octet-stream",
+        base64,
+      };
+    }));
 
-    // ✅ metadata fields
-    fd.append("userId", loggedUserId);
-    fd.append("userName", ($("#profileName")?.textContent || "").trim());
-    fd.append("date", $("#photoDate")?.value || t.isoDate);
-    fd.append("period", period);
-    fd.append("plant", plant);
+    const payload = {
+      userId: loggedUserId,
+      userName: ($("#profileName")?.textContent || "").trim(),
+      date: $("#photoDate")?.value || t.isoDate,
+      period,
+      plant,
+      photos: photosBase64,
+    };
 
-    // ✅ IMPORTANT: key name must match n8n "Field Name for Binary Data" = photos
-    for (const f of files) {
-      fd.append("photos", f, f.name);
-    }
-
+    // text/plain → CORS preflight skip karne ke liye (Apps Script preflight handle nahi karta)
     const res = await fetch(PHOTO_WEBHOOK_URL, {
       method: "POST",
-      body: fd,
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
@@ -662,7 +671,8 @@ function initUserPage() {
     photoFile.value = "";
     $("#imgPreviewWrap")?.classList.add("hidden");
 
-    toastOk("Uploaded!", "Photos sent to n8n successfully.");
+    toastOk("Uploaded!", "Photos saved successfully.");
+    setTimeout(() => renderUserPhotos(loggedUserId), 800);
   } catch (err) {
     console.error(err);
     toastErr("Failed", "Could not upload photos. Please try again.");
